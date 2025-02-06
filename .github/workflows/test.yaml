@@ -1,0 +1,185 @@
+name: Tests for SpeckCn2
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  Build-n-test:
+
+    if: github.event.pull_request.draft == false
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest']
+        python-version: ['3.12']
+        gcc-version: ['12']
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/cache@v3
+      id: cache-virtualenv
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ matrix.os }}-${{ matrix.python-version }}
+
+    - name: Download ResNet results
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: generate_test_reference.yaml
+        workflow_search: false
+        workflow_conclusion: success
+        name: ResNet-results-${{ matrix.python-version }}-${{ matrix.os }}
+        path: Model_test_resnet_score
+        if_no_artifact_found: fail
+
+    - name: Download SCNN results
+      id: download-artifact2
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: generate_test_reference.yaml
+        workflow_search: false
+        workflow_conclusion: success
+        name: SCNN-results-${{ matrix.python-version }}-${{ matrix.os }}
+        path: Model_test_scnn_score
+        if_no_artifact_found: fail
+
+    - name: Download ResNet weights
+      id: download-artifact3
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: generate_test_reference.yaml
+        workflow_search: false
+        workflow_conclusion: success
+        name: ResNet-weights-${{ matrix.python-version }}-${{ matrix.os }}
+        path: Model_test_resnet_states
+        if_no_artifact_found: fail
+
+    - name: Download SCNN weights
+      id: download-artifact4
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: generate_test_reference.yaml
+        workflow_search: false
+        workflow_conclusion: success
+        name: SCNN-weights-${{ matrix.python-version }}-${{ matrix.os }}
+        path: Model_test_scnn_states
+        if_no_artifact_found: fail
+
+    - name: Move test baseline to the correct location
+      run: |
+        mkdir -p tests/test_data/speckles/expected_results
+        rm -rf tests/test_data/speckles/expected_results/*
+        mv Model_test_*_score tests/test_data/speckles/expected_results/.
+        mkdir -p tests/test_data/speckles/expected_model_weights
+        rm -rf tests/test_data/speckles/expected_model_weights/*
+        mv Model_test_*_states tests/test_data/speckles/expected_model_weights/.
+
+    - name: Install Fortran compiler on Ubuntu
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update && sudo apt-get install -y gfortran
+    - name: Install Fortran compiler on macOS
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install gcc@${{ matrix.gcc-version }}
+        echo "FC=gfortran-${{ matrix.gcc-version }}" >> "$GITHUB_ENV"
+        echo "CC=gcc-${{ matrix.gcc-version }}" >> "$GITHUB_ENV"
+    - name: Install Fortran compiler on Windows
+      if: matrix.os == 'windows-latest'
+      run: choco install mingw
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .[develop]
+
+    - name: Clean Pytest Cache
+      run: rm -rf .pytest_cache
+
+    - name: Test with pytest and coverage
+      run: |
+          python -m coverage run -p -m pytest
+
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: testfail-images-${{ matrix.python-version }}-${{ matrix.os }}
+        path: .tests/image_diff/
+
+    - name: Upload ResNet images
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: resnet-images-testfail-${{ matrix.python-version }}-${{ matrix.os }}
+        path: tests/test_data/speckles/Model_test_resnet_score
+
+    - name: Upload SCNN images
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: scnn-images-testfail-${{ matrix.python-version }}-${{ matrix.os }}
+        path: tests/test_data/speckles/Model_test_scnn_score
+
+    - name: Upload ResNet weights
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: resnet-weights-testfail-${{ matrix.python-version }}-${{ matrix.os }}
+        path: tests/test_data/speckles/Model_test_resnet_states
+
+    - name: Upload SCNN weights
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: scnn-weights-testfail-${{ matrix.python-version }}-${{ matrix.os }}
+        path: tests/test_data/speckles/Model_test_scnn_states
+
+    - name: Combine
+      run: |
+        python -m coverage combine
+
+    - name: Report coverage
+      run: |
+        python -m coverage json
+        export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+        echo "total=$TOTAL" >> $GITHUB_ENV
+        echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
+        echo $'\n```' >> $GITHUB_STEP_SUMMARY
+        python -m coverage report >> $GITHUB_STEP_SUMMARY
+        echo $'\n```' >> $GITHUB_STEP_SUMMARY
+
+    - name: Make coverage badge
+      if: github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest'
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: ee30d5a40792fc1de92e9dcf0d0e092a
+        filename: covbadge.json
+        label: Coverage
+        message: ${{ env.total }}%
+        minColorRange: 50
+        maxColorRange: 90
+        valColorRange: ${{ env.total }}
