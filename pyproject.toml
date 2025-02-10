@@ -4,21 +4,21 @@ build-backend = "setuptools.build_meta"
 
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
-name = "speckcn2"
-version = "1.0.1"
-description = "Estimate Cn2 from Speckle patterns using machine learning"
+name = "pyrkm"
+version = "0.0.1"
+description = "Machines learning to do machine-learning"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-	{name = "Simone Ciarella", email = "s.ciarella@esciencecenter.nl"},
+	{name = "Simone Ciarella", email = "simoneciarella@gmail.com"},
+	{name = "Marcelo Guzmánn", email = "guzmanjmarcelo@gmail.com"},
 ]
 keywords = [
     'python',
     'machine learning',
-    'equivariant cnn',
-    'optical satelites',
-    'turbulence',
-    'laser communication'
+    'boltzmann machine',
+    'physical learning',
+    'equilibrium propagation',
 ]
 license = {text = "Apache 2.0 License"}
 classifiers = [
@@ -35,21 +35,16 @@ classifiers = [
 dependencies = [
   'matplotlib >= 3.6.0',
   'numpy',
-  'scipy>=1.9.3',
   'torch',
   'torchvision',
-  'PyYAML',
-  'cython',
-  'lie_learn_escience',
-  'escnn_escience',
-  'h5py',
+  'pandas',
 ]
 
 [project.urls]
-homepage="https://github.com/MALES-project/SpeckleCn2Profiler"
-issues = "https://github.com/MALES-project/SpeckleCn2Profiler/issues"
-documentation = "https://speckcn2.readthedocs.io"
-changelog = "https://github.com/MALES-project/SpeckleCn2Profiler/releases"
+homepage="https://github.com/Kirchhoff-Machines/pyrkm"
+issues = "https://github.com/Kirchhoff-Machines/pyrkm/issues"
+documentation = "https://pyrkm.readthedocs.io"
+changelog = "https://github.com/Kirchhoff-Machines/pyrkm/releases"
 
 [project.optional-dependencies]
 develop = [
@@ -80,12 +75,12 @@ publishing = [
 ]
 
 [tool.setuptools]
-package-dir = {"speckcn2" = "src/speckcn2" }
+package-dir = {"pyrkm" = "src/pyrkm" }
 include-package-data = true
 
 [tool.coverage.run]
 branch = true
-source = ["speckcn2"]
+source = ["pyrkm"]
 
 
 [tool.pytest.ini_options]
@@ -103,7 +98,7 @@ select = [
 line-length = 110
 
 [tool.ruff.isort]
-known-first-party=["speckcn2"]
+known-first-party=["pyrkm"]
 known-third-party = ["torch"]
 required-imports = ["from __future__ import annotations"]
 
@@ -118,10 +113,10 @@ ignore_missing_imports = true
 
 
 [tool.bumpversion]
-current_version = "1.0.1"
+current_version = "0.0.1"
 
 [[tool.bumpversion.files]]
-filename = "src/speckcn2/__init__.py"
+filename = "src/pyrkm/__init__.py"
 search = "__version__ = '{current_version}'"
 replace = "__version__ = '{new_version}'"
 

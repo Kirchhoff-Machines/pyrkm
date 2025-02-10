@@ -44,6 +44,6 @@ repos:
       - id: nbqa-yapf
         additional_dependencies: [toml, yapf]
         types_or: [jupyter]
-      - id: nbqa-ruff
-        args: [--fix, --ignore=E402]
-        types_or: [jupyter]
+      #- id: nbqa-ruff
+      #  args: [--fix, --ignore=E402]
+      #  types_or: [jupyter]
