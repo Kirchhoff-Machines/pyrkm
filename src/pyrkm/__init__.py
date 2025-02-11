@@ -1,6 +1,7 @@
 # Import any modules or subpackages here
 from __future__ import annotations
 
+from .classifier import CustomDataset, SimpleClassifier, show_classification, train_classifier
 from .rbm import RBM
 from .rkm import RKM
 from .utils import (
@@ -25,5 +26,6 @@ __all__ = [
     'RBM', 'RKM', 'load_model', 'show_and_save', 'make_grid', 'getbasebias',
     'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
     'ComputeAATS', 'Compute_FID', 'Compute_S', 'generate_S_matrix',
-    'generate_synthetic_data', 'my_entropy', 'binarize_image'
+    'generate_synthetic_data', 'my_entropy', 'binarize_image', 'CustomDataset',
+    'SimpleClassifier', 'train_classifier', 'show_classification'
 ]
