@@ -11,9 +11,12 @@ tMp/
 __pycache__/
 build/
 .ruff_cache/
-speckcn2.egg-info/
+*.egg-info/
 
 .coverage
 .coverage*
 
 .tests
+
+model_measures/
+model_states/
