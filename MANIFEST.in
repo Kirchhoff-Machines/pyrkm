@@ -1,1 +1,1 @@
-recursive-include src/speckcn2/data *
+recursive-include src/pyrkm/data *

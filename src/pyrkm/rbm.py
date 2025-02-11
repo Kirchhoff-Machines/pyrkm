@@ -36,6 +36,9 @@ class RBM:
     max_W: float = 10
 
     def __post_init__(self):
+        """Initializes the RBM model by setting up the device,
+        parameters, optimizer, persistent chains,
+        centering, save points, and physical performance."""
         print(f'*** Initializing {self.model_name}')
         self.device = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
@@ -50,6 +53,7 @@ class RBM:
         self._initialize_physical_performance()
 
     def _initialize_parameters(self):
+        """Initializes the parameters of the RBM model, including weights and biases."""
         self.W = torch.randn(
             (self.n_hidden, self.n_visible),
             dtype=self.mytype,
@@ -62,7 +66,13 @@ class RBM:
                                   device=self.device)
         self._clip_parameters()
 
+    def _clip_parameters(self):
+        """Clips the weights and biases of the RBM model to be within specified bounds."""
+        self.clip_weights()
+        self.clip_bias()
+
     def _initialize_optimizer(self):
+        """Initializes the optimizer parameters if the optimizer is Adam."""
         if self.optimizer == 'Adam':
             self.m_dW = torch.zeros_like(self.W)
             self.m_dv = torch.zeros_like(self.v_bias)
@@ -75,12 +85,14 @@ class RBM:
             self.epsilon = 1e-8
 
     def _initialize_persistent_chains(self):
+        """Initializes the persistent chains for the PCD training algorithm."""
         if self.train_algo == 'PCD':
             self.persistent_chains = torch.where(
                 torch.rand(self.batch_size, self.n_visible) > 0.5, 1.0,
                 0.0).to(self.device).to(self.mytype)
 
     def _initialize_centering(self):
+        """Initializes the centering parameters if centering is enabled."""
         if self.centering:
             if self.average_data.shape[0] != self.n_visible:
                 print(
@@ -98,6 +110,7 @@ class RBM:
             self.oh = 0
 
     def _initialize_save_points(self):
+        """Initializes the save points for the RBM model."""
         num_points = 50
         self.t_to_save = sorted(
             list(
@@ -107,6 +120,7 @@ class RBM:
                                     num_points)).astype(int).tolist())))
 
     def _initialize_physical_performance(self):
+        """Initializes the physical performance metrics for the RBM model."""
         self.power_f = 0
         self.power_b = 0
         self.energy = 0
@@ -114,6 +128,15 @@ class RBM:
         self.relax_t_f, self.relax_t_b = self.relaxation_times()
 
     def pretrain(self, pretrained_model, model_state_path='model_states/'):
+        """Loads pretrained parameters from a specified model.
+
+        Parameters
+        ----------
+        pretrained_model : str
+            The name of the pretrained model.
+        model_state_path : str, optional
+            The path to the directory containing the model states (default is 'model_states/').
+        """
         filename_list = glob.glob(model_state_path +
                                   '{}_t*.pkl'.format(pretrained_model))
         if len(filename_list) > 0:
@@ -139,6 +162,20 @@ class RBM:
                   flush=True)
 
     def v_to_h(self, v, beta=None):
+        """Converts visible units to hidden units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        tuple
+            The probabilities and samples of the hidden units.
+        """
         if beta is None:
             beta = self.model_beta
         else:
@@ -147,6 +184,20 @@ class RBM:
         return self.Bernoulli_v_to_h(v, beta)
 
     def h_to_v(self, h, beta=None):
+        """Converts hidden units to visible units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        tuple
+            The probabilities and samples of the visible units.
+        """
         if beta is None:
             beta = self.model_beta
         else:
@@ -155,24 +206,94 @@ class RBM:
         return self.Bernoulli_h_to_v(h, beta)
 
     def Deterministic_v_to_h(self, v, beta):
+        """Deterministically converts visible units to hidden units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float
+            The inverse temperature parameter.
+
+        Returns
+        -------
+        tuple
+            The deterministic hidden units.
+        """
         h = (self.delta_eh(v) > 0).to(v.dtype)
         return h, h
 
     def Deterministic_h_to_v(self, h, beta):
+        """Deterministically converts hidden units to visible units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+        beta : float
+            The inverse temperature parameter.
+
+        Returns
+        -------
+        tuple
+            The deterministic visible units.
+        """
         v = (self.delta_ev(h) > 0).to(h.dtype)
         return v, v
 
     def Bernoulli_v_to_h(self, v, beta):
+        """Converts visible units to hidden units using Bernoulli sampling.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float
+            The inverse temperature parameter.
+
+        Returns
+        -------
+        tuple
+            The probabilities and samples of the hidden units.
+        """
         p_h = self._prob_h_given_v(v, beta)
         sample_h = torch.bernoulli(p_h)
         return p_h, sample_h
 
     def Bernoulli_h_to_v(self, h, beta):
+        """Converts hidden units to visible units using Bernoulli sampling.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+        beta : float
+            The inverse temperature parameter.
+
+        Returns
+        -------
+        tuple
+            The probabilities and samples of the visible units.
+        """
         p_v = self._prob_v_given_h(h, beta)
         sample_v = torch.bernoulli(p_v)
         return p_v, sample_v
 
     def _free_energy_hopfield(self, v, beta=None):
+        """Computes the free energy of the visible units using the Hopfield energy function.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        torch.Tensor
+            The free energy of the visible units.
+        """
         if beta is None:
             beta = self.model_beta
         vbias_term = torch.mv(v, self.v_bias) * beta
@@ -181,11 +302,41 @@ class RBM:
         return -hidden_term - vbias_term
 
     def _energy_hopfield(self, v, h):
+        """Computes the energy of the visible and hidden units using the Hopfield energy function.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            The energy of the visible and hidden units.
+        """
         energy = -(torch.mm(v, self.W.t()) * h).sum(1) - torch.mv(
             v, self.v_bias) - torch.mv(h, self.h_bias)
         return energy
 
     def forward(self, v, k, beta=None):
+        """Performs a forward pass through the RBM model.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        k : int
+            The number of Gibbs sampling steps.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        torch.Tensor
+            The reconstructed visible units.
+        """
         if beta is None:
             beta = self.model_beta
         pre_h1, h1 = self.v_to_h(v, beta)
@@ -202,6 +353,23 @@ class RBM:
               print_test_error=False,
               model_state_path='model_states/',
               print_every=100):
+        """Trains the RBM model using the specified training algorithm.
+
+        Parameters
+        ----------
+        train_data : iterable
+            The training data.
+        test_data : iterable, optional
+            The test data (default is an empty list).
+        print_error : bool, optional
+            Whether to print the training error (default is False).
+        print_test_error : bool, optional
+            Whether to print the test error (default is False).
+        model_state_path : str, optional
+            The path to the directory containing the model states (default is 'model_states/').
+        print_every : int, optional
+            The number of epochs between printing the training status (default is 100).
+        """
         while self.epoch < self.max_epochs:
             self.W_t = self.W.t()
 
@@ -360,11 +528,30 @@ class RBM:
         print('*** Training finished', flush=True)
 
     def after_step_keepup(self):
+        """Performs operations to keep the model parameters
+        within specified bounds after each training step."""
         self.clip_weights()
         self.clip_bias()
 
     def SGD_update(self, dEdW_data, dEdW_model, dEdv_bias_data,
                    dEdv_bias_model, dEdh_bias_data, dEdh_bias_model):
+        """Updates the model parameters using Stochastic Gradient Descent (SGD).
+
+        Parameters
+        ----------
+        dEdW_data : torch.Tensor
+            The gradient of the energy with respect to the weights from the data.
+        dEdW_model : torch.Tensor
+            The gradient of the energy with respect to the weights from the model.
+        dEdv_bias_data : torch.Tensor
+            The gradient of the energy with respect to the visible biases from the data.
+        dEdv_bias_model : torch.Tensor
+            The gradient of the energy with respect to the visible biases from the model.
+        dEdh_bias_data : torch.Tensor
+            The gradient of the energy with respect to the hidden biases from the data.
+        dEdh_bias_model : torch.Tensor
+            The gradient of the energy with respect to the hidden biases from the model.
+        """
         dW = -dEdW_data + dEdW_model
         dv = -dEdv_bias_data + dEdv_bias_model
         dh = -dEdh_bias_data + dEdh_bias_model
@@ -385,6 +572,25 @@ class RBM:
 
     def Adam_update(self, t, dEdW_data, dEdW_model, dEdv_bias_data,
                     dEdv_bias_model, dEdh_bias_data, dEdh_bias_model):
+        """Updates the model parameters using the Adam optimizer.
+
+        Parameters
+        ----------
+        t : int
+            The current epoch.
+        dEdW_data : torch.Tensor
+            The gradient of the energy with respect to the weights from the data.
+        dEdW_model : torch.Tensor
+            The gradient of the energy with respect to the weights from the model.
+        dEdv_bias_data : torch.Tensor
+            The gradient of the energy with respect to the visible biases from the data.
+        dEdv_bias_model : torch.Tensor
+            The gradient of the energy with respect to the visible biases from the model.
+        dEdh_bias_data : torch.Tensor
+            The gradient of the energy with respect to the hidden biases from the data.
+        dEdh_bias_model : torch.Tensor
+            The gradient of the energy with respect to the hidden biases from the model.
+        """
         dW = -dEdW_data + dEdW_model
         dv = -dEdv_bias_data + dEdv_bias_model
         dh = -dEdh_bias_data + dEdh_bias_model
@@ -419,6 +625,20 @@ class RBM:
             m_dh_corr / (torch.sqrt(v_dh_corr) + self.epsilon))
 
     def reconstruct(self, data, k):
+        """Reconstructs the visible units from the data using k Gibbs sampling steps.
+
+        Parameters
+        ----------
+        data : array-like
+            The input data.
+        k : int
+            The number of Gibbs sampling steps.
+
+        Returns
+        -------
+        tuple
+            The original and reconstructed visible units.
+        """
         data = torch.Tensor(data).to(self.device).to(self.mytype)
         v_model = self.forward(data, k)
         return data.detach().cpu().numpy(), v_model.detach().cpu().numpy()
@@ -429,6 +649,26 @@ class RBM:
                  h_binarized=True,
                  from_visible=True,
                  beta=None):
+        """Generates samples from the RBM model.
+
+        Parameters
+        ----------
+        n_samples : int
+            The number of samples to generate.
+        k : int
+            The number of Gibbs sampling steps.
+        h_binarized : bool, optional
+            Whether to binarize the hidden units (default is True).
+        from_visible : bool, optional
+            Whether to generate samples from visible units (default is True).
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        numpy.ndarray
+            The generated samples.
+        """
         if beta is None:
             beta = self.model_beta
         if from_visible:
@@ -452,44 +692,165 @@ class RBM:
         return v_model.detach().cpu().numpy()
 
     def clip_weights(self):
+        """Clips the weights of the RBM model to be within specified bounds."""
         self.W = torch.clip(self.W, self.min_W, self.max_W)
         self.W_t = self.W.t()
 
     def clip_bias(self):
+        """Clips the biases of the RBM model to be within specified bounds."""
         self.v_bias = torch.clip(self.v_bias, self.min_W, self.max_W)
         self.h_bias = torch.clip(self.h_bias, self.min_W, self.max_W)
 
     def _prob_h_given_v(self, v, beta=None):
+        """Computes the probability of the hidden units given the visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        torch.Tensor
+            The probabilities of the hidden units.
+        """
         if beta is None:
             beta = self.model_beta
         return torch.sigmoid(beta * self.delta_eh(v))
 
     def _prob_v_given_h(self, h, beta=None):
+        """Computes the probability of the visible units given the hidden units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        torch.Tensor
+            The probabilities of the visible units.
+        """
         if beta is None:
             beta = self.model_beta
         return torch.sigmoid(beta * self.delta_ev(h))
 
     def delta_eh(self, v):
+        """Computes the change in energy with respect to the hidden units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            The change in energy with respect to the hidden units.
+        """
         return self._delta_eh_hopfield(v)
 
     def delta_ev(self, h):
+        """Computes the change in energy with respect to the visible units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            The change in energy with respect to the visible units.
+        """
         return self._delta_ev_hopfield(h)
 
     def _delta_eh_hopfield(self, v):
+        """Computes the change in energy with respect to the hidden units using the Hopfield energy function.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            The change in energy with respect to the hidden units.
+        """
         return torch.mm(v, self.W_t) + self.h_bias
 
     def _delta_ev_hopfield(self, h):
+        """Computes the change in energy with respect to the visible units using the Hopfield energy function.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            The change in energy with respect to the visible units.
+        """
         return torch.mm(h, self.W) + self.v_bias
 
     def derivatives(self, v, h):
+        """Computes the derivatives of the energy with respect to the weights and biases.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        tuple
+            The derivatives of the energy with respect to the weights, visible biases, and hidden biases.
+        """
         return self.derivatives_hopfield(v, h)
 
     def free_energy(self, v, beta=None):
+        """Computes the free energy of the visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        beta : float, optional
+            The inverse temperature parameter (default is None).
+
+        Returns
+        -------
+        torch.Tensor
+            The free energy of the visible units.
+        """
         if beta is None:
             beta = self.model_beta
         return self._free_energy_hopfield(v, beta)
 
     def derivatives_hopfield(self, v, h):
+        """Computes the derivatives of the energy with respect to
+        the weights and biases using the Hopfield energy function.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        tuple
+            The derivatives of the energy with respect to the weights, visible biases, and hidden biases.
+        """
         if self.centering:
             dEdW = -torch.einsum('ij,ik->ijk', h - self.oh, v - self.ov)
         else:
@@ -499,6 +860,13 @@ class RBM:
         return dEdW, dEdv_bias, dEdh_bias
 
     def plot_weights(self, t):
+        """Plots the weights of the RBM model.
+
+        Parameters
+        ----------
+        t : int
+            The current epoch.
+        """
         Ndata = self.W.shape[0]
         data_3d = self.W.detach().cpu().numpy().reshape(Ndata, 28, 28)
         num_rows = int(np.ceil(np.sqrt(Ndata)))
@@ -527,6 +895,13 @@ class RBM:
         cax.set_aspect('auto')
 
     def plot_visible_bias(self, t):
+        """Plots the visible biases of the RBM model.
+
+        Parameters
+        ----------
+        t : int
+            The current epoch.
+        """
         data_2d = self.v_bias.detach().cpu().numpy().reshape(28, 28)
         fig, ax = plt.subplots(figsize=(5, 5))
         im = ax.imshow(data_2d, cmap='magma')
@@ -537,6 +912,13 @@ class RBM:
         ax.set_ylabel('Rows')
 
     def plot_bias(self, t):
+        """Plots the hidden and visible biases of the RBM model.
+
+        Parameters
+        ----------
+        t : int
+            The current epoch.
+        """
         h_bias = self.h_bias.detach().cpu().numpy()
         v_bias = self.v_bias.detach().cpu().numpy()
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
@@ -551,6 +933,13 @@ class RBM:
         plt.tight_layout()
 
     def _center(self):
+        """Centers the weights and biases of the RBM model.
+
+        Returns
+        -------
+        tuple
+            The centered weights, visible biases, and hidden biases.
+        """
         W_centered = self.W_t
         v_bias_centered = (self.v_bias +
                            0.5 * W_centered.sum(dim=1)) / self.g_v
@@ -561,6 +950,24 @@ class RBM:
 
     def _RKM_v_to_h(self, v_centered, W_centered, v_bias_centered,
                     h_bias_centered):
+        """Converts centered visible units to hidden units using the RKM method.
+
+        Parameters
+        ----------
+        v_centered : torch.Tensor
+            The centered visible units.
+        W_centered : torch.Tensor
+            The centered weights.
+        v_bias_centered : torch.Tensor
+            The centered visible biases.
+        h_bias_centered : torch.Tensor
+            The centered hidden biases.
+
+        Returns
+        -------
+        torch.Tensor
+            The hidden units.
+        """
         h_eq = (torch.mm(v_centered, W_centered) +
                 self.g_h * h_bias_centered) / (
                     (torch.abs(W_centered).sum(dim=0) +
@@ -569,12 +976,42 @@ class RBM:
 
     def _RKM_h_to_v(self, h_centered, W_centered, v_bias_centered,
                     h_bias_centered):
+        """Converts centered hidden units to visible units using the RKM method.
+
+        Parameters
+        ----------
+        h_centered : torch.Tensor
+            The centered hidden units.
+        W_centered : torch.Tensor
+            The centered weights.
+        v_bias_centered : torch.Tensor
+            The centered visible biases.
+        h_bias_centered : torch.Tensor
+            The centered hidden biases.
+
+        Returns
+        -------
+        torch.Tensor
+            The visible units.
+        """
         v_eq = (torch.mm(h_centered, W_centered.T) +
                 self.g_v * v_bias_centered) / (torch.abs(W_centered).sum(dim=1)
                                                + torch.abs(v_bias_centered))
         return v_eq
 
     def power_forward(self, v):
+        """Computes the forward power of the visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            The forward power of the visible units.
+        """
         v_centered = v - 0.5
         W_centered, v_bias_centered, h_bias_centered = self._center()
         h_eq = self._RKM_v_to_h(v_centered, W_centered, v_bias_centered,
@@ -593,6 +1030,18 @@ class RBM:
         return power
 
     def power_backward(self, h):
+        """Computes the backward power of the hidden units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            The backward power of the hidden units.
+        """
         h_centered = h - 0.5
         W_centered, v_bias_centered, h_bias_centered = self._center()
         v_eq = self._RKM_h_to_v(h_centered, W_centered, v_bias_centered,
@@ -611,12 +1060,43 @@ class RBM:
         return power
 
     def av_power_forward(self, v):
+        """Computes the average forward power of the visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            The visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            The average forward power of the visible units.
+        """
         return self.power_forward(v).mean()
 
     def av_power_backward(self, h):
+        """Computes the average backward power of the hidden units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            The hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            The average backward power of the hidden units.
+        """
         return self.power_backward(h).mean()
 
     def relaxation_times(self):
+        """Computes the relaxation times for the forward and backward passes.
+
+        Returns
+        -------
+        tuple
+            The relaxation times for the forward and backward passes.
+        """
         W_centered, v_bias_centered, h_bias_centered = self._center()
         t_forward = 1 / (torch.abs(W_centered / 2).sum(dim=0) +
                          torch.abs(h_bias_centered))

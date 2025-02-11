@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from .rbm_pytorch import RBM
+from .rbm import RBM
 
 
 @dataclass
@@ -42,6 +42,7 @@ class RKM(RBM):
     max_W = 10
 
     def __post_init__(self):
+        """Initialize the RKM model after the dataclass is created."""
         super().__post_init__()
         if self.average_data is not None:
             self.v_bias = self.average_data.to(self.device).to(self.mytype)
@@ -76,6 +77,15 @@ class RKM(RBM):
             self.oh = 0
 
     def pretrain(self, pretrained_model, model_state_path='model_states/'):
+        """Pretrain the model using a pretrained model.
+
+        Parameters
+        ----------
+        pretrained_model : str
+            Name of the pretrained model.
+        model_state_path : str, optional
+            Path to the model states, by default 'model_states/'.
+        """
         # Check if you have model load points
         filename_list = glob.glob(model_state_path +
                                   '{}_t*.pkl'.format(pretrained_model))
@@ -101,6 +111,20 @@ class RKM(RBM):
                   flush=True)
 
     def v_to_h(self, v, beta=None):
+        """Convert visible units to hidden units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Probabilities and sampled hidden units.
+        """
         if beta is None:
             beta = self.model_beta
         if self.energy_type == 'RKM':
@@ -153,6 +177,20 @@ class RKM(RBM):
             return super().v_to_h(v, beta)
 
     def h_to_v(self, h, beta=None):
+        """Convert hidden units to visible units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Probabilities and sampled visible units.
+        """
         if beta is None:
             beta = self.model_beta
         if self.energy_type == 'RKM':
@@ -205,24 +243,94 @@ class RKM(RBM):
             return super().h_to_v(h, beta)
 
     def Deterministic_v_to_h(self, v, beta):
+        """Deterministically convert visible units to hidden units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        beta : float
+            Inverse temperature parameter.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Deterministic hidden units.
+        """
         h = (self.delta_eh(v) > 0).to(v.dtype)
         return h, h
 
     def Deterministic_h_to_v(self, h, beta):
+        """Deterministically convert hidden units to visible units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+        beta : float
+            Inverse temperature parameter.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Deterministic visible units.
+        """
         v = (self.delta_ev(h) > 0).to(h.dtype)
         return v, v
 
     def Bernoulli_v_to_h(self, v, beta):
+        """Convert visible units to hidden units using Bernoulli sampling.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        beta : float
+            Inverse temperature parameter.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Probabilities and sampled hidden units.
+        """
         p_h = self._prob_h_given_v(v, beta)
         sample_h = torch.bernoulli(p_h)
         return p_h, sample_h
 
     def Bernoulli_h_to_v(self, h, beta):
+        """Convert hidden units to visible units using Bernoulli sampling.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+        beta : float
+            Inverse temperature parameter.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Probabilities and sampled visible units.
+        """
         p_v = self._prob_v_given_h(h, beta)
         sample_v = torch.bernoulli(p_v)
         return p_v, sample_v
 
     def _free_energy_hopfield(self, v, beta=None):
+        """Compute the free energy of the Hopfield network.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        torch.Tensor
+            Free energy of the Hopfield network.
+        """
         if beta is None:
             beta = self.model_beta
         vbias_term = torch.mv(v, self.v_bias) * beta
@@ -231,11 +339,41 @@ class RKM(RBM):
         return -hidden_term - vbias_term
 
     def _energy_hopfield(self, v, h):
+        """Compute the energy of the Hopfield network.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        h : torch.Tensor
+            Hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            Energy of the Hopfield network.
+        """
         energy = -(torch.mm(v, self.W.t()) * h).sum(1) - torch.mv(
             v, self.v_bias) - torch.mv(h, self.h_bias)
         return energy
 
     def forward(self, v, k, beta=None):
+        """Perform a forward pass through the network.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        k : int
+            Number of Gibbs sampling steps.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        torch.Tensor
+            Reconstructed visible units.
+        """
         if beta is None:
             beta = self.model_beta
         pre_h1, h1 = self.v_to_h(v, beta)
@@ -252,9 +390,23 @@ class RKM(RBM):
               print_test_error=False,
               model_state_path='model_states/',
               print_every=100):
-        '''
-        Train the model using the given data and parameters
-        '''
+        """Train the model using the given data and parameters.
+
+        Parameters
+        ----------
+        train_data : torch.Tensor
+            Training data.
+        test_data : torch.Tensor, optional
+            Test data, by default [].
+        print_error : bool, optional
+            Whether to print training error, by default False.
+        print_test_error : bool, optional
+            Whether to print test error, by default False.
+        model_state_path : str, optional
+            Path to save model states, by default 'model_states/'.
+        print_every : int, optional
+            Frequency of printing progress, by default 100.
+        """
         while self.epoch < self.max_epochs:
             self.W_t = self.W.t()
 
@@ -430,12 +582,30 @@ class RKM(RBM):
         print('*** Training finished', flush=True)
 
     def after_step_keepup(self):
+        """Perform operations after each training step."""
         # self.W_t = self.W.t() # already done in clip_weights
         self.clip_weights()
         self.clip_bias()
 
     def SGD_update(self, dEdW_data, dEdW_model, dEdv_bias_data,
                    dEdv_bias_model, dEdh_bias_data, dEdh_bias_model):
+        """Update the model parameters using SGD.
+
+        Parameters
+        ----------
+        dEdW_data : torch.Tensor
+            Gradient of the weights from data.
+        dEdW_model : torch.Tensor
+            Gradient of the weights from the model.
+        dEdv_bias_data : torch.Tensor
+            Gradient of the visible biases from data.
+        dEdv_bias_model : torch.Tensor
+            Gradient of the visible biases from the model.
+        dEdh_bias_data : torch.Tensor
+            Gradient of the hidden biases from data.
+        dEdh_bias_model : torch.Tensor
+            Gradient of the hidden biases from the model.
+        """
         # Gradients
         dW = -dEdW_data + dEdW_model
         dv = -dEdv_bias_data + dEdv_bias_model
@@ -462,6 +632,25 @@ class RKM(RBM):
 
     def Adam_update(self, t, dEdW_data, dEdW_model, dEdv_bias_data,
                     dEdv_bias_model, dEdh_bias_data, dEdh_bias_model):
+        """Update the model parameters using Adam optimizer.
+
+        Parameters
+        ----------
+        t : int
+            Current time step.
+        dEdW_data : torch.Tensor
+            Gradient of the weights from data.
+        dEdW_model : torch.Tensor
+            Gradient of the weights from the model.
+        dEdv_bias_data : torch.Tensor
+            Gradient of the visible biases from data.
+        dEdv_bias_model : torch.Tensor
+            Gradient of the visible biases from the model.
+        dEdh_bias_data : torch.Tensor
+            Gradient of the hidden biases from data.
+        dEdh_bias_model : torch.Tensor
+            Gradient of the hidden biases from the model.
+        """
         # Gradients
         dW = -dEdW_data + dEdW_model
         dv = -dEdv_bias_data + dEdv_bias_model
@@ -502,6 +691,20 @@ class RKM(RBM):
             m_dh_corr / (torch.sqrt(v_dh_corr) + self.epsilon))
 
     def reconstruct(self, data, k):
+        """Reconstruct the visible units from the data.
+
+        Parameters
+        ----------
+        data : array-like
+            Input data.
+        k : int
+            Number of Gibbs sampling steps.
+
+        Returns
+        -------
+        tuple of numpy.ndarray
+            Original and reconstructed visible units.
+        """
         data = torch.Tensor(data).to(self.device).to(self.mytype)
         v_model = self.forward(data, k)
         return data.detach().cpu().numpy(), v_model.detach().cpu().numpy()
@@ -512,6 +715,26 @@ class RKM(RBM):
                  h_binarized=True,
                  from_visible=True,
                  beta=None):
+        """Generate samples from the model.
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of samples to generate.
+        k : int
+            Number of Gibbs sampling steps.
+        h_binarized : bool, optional
+            Whether to binarize hidden units, by default True.
+        from_visible : bool, optional
+            Whether to generate from visible units, by default True.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        numpy.ndarray
+            Generated samples.
+        """
         if beta is None:
             beta = self.model_beta
         if from_visible:
@@ -535,10 +758,12 @@ class RKM(RBM):
         return v_model.detach().cpu().numpy()
 
     def clip_weights(self):
+        """Clip the weights to be within the specified range."""
         self.W = torch.clip(self.W, self.min_W, self.max_W)
         self.W_t = self.W.t()
 
     def clip_bias(self):
+        """Clip the biases to be within the specified range."""
         self.v_bias = torch.clip(self.v_bias, self.min_W, self.max_W)
         self.h_bias = torch.clip(self.h_bias, self.min_W, self.max_W)
 
@@ -547,6 +772,20 @@ class RKM(RBM):
     ########################################################
 
     def derivatives(self, v, h):
+        """Compute the derivatives for the specified energy type.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        h : torch.Tensor
+            Hidden units.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Gradients of the weights, visible biases, and hidden biases.
+        """
         if self.energy_type == 'hopfield' or self.energy_type == 'RKM':
             return self.derivatives_hopfield(v, h)
         else:
@@ -555,6 +794,20 @@ class RKM(RBM):
             sys.exit()
 
     def derivatives_hopfield(self, v, h):
+        """Compute the derivatives for the Hopfield energy.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        h : torch.Tensor
+            Hidden units.
+
+        Returns
+        -------
+        tuple of torch.Tensor
+            Gradients of the weights, visible biases, and hidden biases.
+        """
         # h has shape (N, n_h) and v has shape (N, n_v), we want result to have shape (N, n_h, n_v)
         if self.centering:
             dEdW = -torch.einsum('ij,ik->ijk', h - self.oh, v - self.ov)
@@ -569,16 +822,56 @@ class RKM(RBM):
     ########################################
 
     def _prob_h_given_v(self, v, beta=None):
+        """Compute the probability of hidden units given visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        torch.Tensor
+            Probability of hidden units.
+        """
         if beta is None:
             beta = self.model_beta
         return torch.sigmoid(beta * self.delta_eh(v))
 
     def _prob_v_given_h(self, h, beta=None):
+        """Compute the probability of visible units given hidden units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+        beta : float, optional
+            Inverse temperature parameter, by default None.
+
+        Returns
+        -------
+        torch.Tensor
+            Probability of visible units.
+        """
         if beta is None:
             beta = self.model_beta
         return torch.sigmoid(beta * self.delta_ev(h))
 
     def delta_eh(self, v):
+        """Compute the change in energy for hidden units given visible units.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            Change in energy for hidden units.
+        """
         if self.energy_type == 'hopfield':
             return self._delta_eh_hopfield(v)
         else:
@@ -587,6 +880,18 @@ class RKM(RBM):
             sys.exit()
 
     def delta_ev(self, h):
+        """Compute the change in energy for visible units given hidden units.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            Change in energy for visible units.
+        """
         if self.energy_type == 'hopfield':
             return self._delta_ev_hopfield(h)
         else:
@@ -596,9 +901,33 @@ class RKM(RBM):
 
     # **** Hopfield transfer functions
     def _delta_eh_hopfield(self, v):
+        """Compute the change in energy for hidden units in the Hopfield network.
+
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units.
+
+        Returns
+        -------
+        torch.Tensor
+            Change in energy for hidden units.
+        """
         return torch.mm(v, self.W_t) + self.h_bias
 
     def _delta_ev_hopfield(self, h):
+        """Compute the change in energy for visible units in the Hopfield network.
+
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units.
+
+        Returns
+        -------
+        torch.Tensor
+            Change in energy for visible units.
+        """
         return torch.mm(h, self.W) + self.v_bias
 
     ########################################
@@ -606,6 +935,13 @@ class RKM(RBM):
     ########################################
 
     def plot_weights(self, t):
+        """Plot the weights of the model.
+
+        Parameters
+        ----------
+        t : int
+            Current epoch.
+        """
         Ndata = self.W.shape[0]
         # Reshape the matrix into a 3D array
         data_3d = self.W.detach().cpu().numpy().reshape(Ndata, 28, 28)
@@ -645,6 +981,13 @@ class RKM(RBM):
 
     # ** Plotting visible biases with imshow (as one matrix of the same size as the weights)
     def plot_visible_bias(self, t):
+        """Plot the visible biases of the model.
+
+        Parameters
+        ----------
+        t : int
+            Current epoch.
+        """
         # Reshape the vector into a 2D array
         data_2d = self.v_bias.detach().cpu().numpy().reshape(28, 28)
         # Create a figure and axis for the plot
@@ -661,6 +1004,13 @@ class RKM(RBM):
 
     # ** Plotting bias
     def plot_bias(self, t):
+        """Plot the biases of the model.
+
+        Parameters
+        ----------
+        t : int
+            Current epoch.
+        """
         h_bias = self.h_bias.detach().cpu().numpy()
         v_bias = self.v_bias.detach().cpu().numpy()
         # Set up the figure with two subplots
@@ -689,14 +1039,18 @@ class RKM(RBM):
     '''
 
     def power_forward(self, v):
-        '''
-        Computes the power dissipated by the RKM in the forward pass.
+        """Computes the power dissipated by the RKM in the forward pass.
 
-        Args:
-            v: visible units, shape (N, n_v)
-        Returns:
-            Power dissipated by the RKM, shape (N,)
-        '''
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units, shape (N, n_v).
+
+        Returns
+        -------
+        torch.Tensor
+            Power dissipated by the RKM, shape (N,).
+        """
         effective_h_bias = self.h_bias + 0.5 * self.offset * (
             (torch.abs(self.h_bias) - self.h_bias) / self.g_h +
             (torch.abs(self.W) - self.W).sum(dim=1))
@@ -728,14 +1082,18 @@ class RKM(RBM):
         return power_forward
 
     def power_backward(self, h):
-        '''
-        Computes the power dissipated by the RKM in the backward pass.
+        """Computes the power dissipated by the RKM in the backward pass.
 
-        Args:
-            h: hidden units, shape (N, n_h)
-        Returns:
-            Power dissipated by the RKM, shape (N,)
-        '''
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units, shape (N, n_h).
+
+        Returns
+        -------
+        torch.Tensor
+            Power dissipated by the RKM, shape (N,).
+        """
         effective_v_bias = self.v_bias + 0.5 * self.offset * (
             (torch.abs(self.v_bias) - self.v_bias) / self.g_v +
             (torch.abs(self.W) - self.W).sum(dim=0))
@@ -766,37 +1124,44 @@ class RKM(RBM):
         return power_backward
 
     def av_power_forward(self, v):
-        '''
-        Computes the average power dissipated by the RKM in the forward pass.
+        """Computes the average power dissipated by the RKM in the forward pass.
 
-        Args:
-            v: visible units, shape (N, n_v)
-        Returns:
-            Average power dissipated by the RKM
-        '''
+        Parameters
+        ----------
+        v : torch.Tensor
+            Visible units, shape (N, n_v).
+
+        Returns
+        -------
+        torch.Tensor
+            Average power dissipated by the RKM.
+        """
         return self.power_forward(v).mean()
 
     def av_power_backward(self, h):
-        '''
-        Computes the average power dissipated by the RKM in the backward pass.
+        """Computes the average power dissipated by the RKM in the backward pass.
 
-        Args:
-            h: hidden units, shape (N, n_h)
-        Returns:
-            Average power dissipated by the RKM
-        '''
+        Parameters
+        ----------
+        h : torch.Tensor
+            Hidden units, shape (N, n_h).
+
+        Returns
+        -------
+        torch.Tensor
+            Average power dissipated by the RKM.
+        """
         return self.power_backward(h).mean()
 
     def relaxation_times(self):
-        '''
-        Computes the relaxation times of the RKM in the forward and backward pass.
+        """Computes the relaxation times of the RKM in the forward and backward pass.
 
-        Args:
-            None
-        Returns:
-            t_forward: relaxation times of the RKM in the forward pass, shape (n_v,)
-            t_backward: relaxation times of the RKM in the backward pass, shape (n_h,)
-        '''
+        Returns
+        -------
+        tuple of torch.Tensor
+            t_forward : relaxation times of the RKM in the forward pass, shape (n_v,).
+            t_backward : relaxation times of the RKM in the backward pass, shape (n_h,).
+        """
         t_forward = 2 / (torch.abs(self.W).sum(dim=1) +
                          torch.abs(self.h_bias) / self.g_h)
         t_backward = 2 / (torch.abs(self.W).sum(dim=0) +

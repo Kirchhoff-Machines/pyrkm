@@ -26,6 +26,7 @@ Requires-Dist: numpy
 Requires-Dist: torch
 Requires-Dist: torchvision
 Requires-Dist: pandas
+Requires-Dist: scipy
 Provides-Extra: develop
 Requires-Dist: bump-my-version; extra == "develop"
 Requires-Dist: coverage[toml]; extra == "develop"

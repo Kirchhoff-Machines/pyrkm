@@ -3,6 +3,7 @@ numpy
 torch
 torchvision
 pandas
+scipy
 
 [develop]
 bump-my-version

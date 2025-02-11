@@ -11,11 +11,9 @@ src/pyrkm/__init__.py
 src/pyrkm/autoencoder.py
 src/pyrkm/circuit_utils.py
 src/pyrkm/classifier.py
-src/pyrkm/rbm_pytorch.py
-src/pyrkm/rkm_pytorch.py
-src/pyrkm/utils_pytorch.py
-tests/test_integration.py
-tests/test_io.py
-tests/test_mlmodels.py
-tests/test_postprocess.py
-tests/test_preprocess.py
+src/pyrkm/rbm.py
+src/pyrkm/rkm.py
+src/pyrkm/utils.py
+tests/test_rbm.py
+tests/test_rkm.py
+tests/test_utils.py

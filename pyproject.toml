@@ -38,6 +38,7 @@ dependencies = [
   'torch',
   'torchvision',
   'pandas',
+  'scipy'
 ]
 
 [project.urls]

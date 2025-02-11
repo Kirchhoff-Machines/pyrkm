@@ -29,18 +29,6 @@ jobs:
         run: |
           which python
           python --version
-      - name: Install Fortran compiler on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y gfortran
-      - name: Install Fortran compiler on macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install gcc@${{ matrix.gcc-version }}
-          echo "FC=gfortran-${{ matrix.gcc-version }}" >> "$GITHUB_ENV"
-          echo "CC=gcc-${{ matrix.gcc-version }}" >> "$GITHUB_ENV"
-      - name: Install Fortran compiler on Windows
-        if: matrix.os == 'windows-latest'
-        run: choco install mingw
       - name: Install dependencies
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |

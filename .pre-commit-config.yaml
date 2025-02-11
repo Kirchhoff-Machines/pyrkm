@@ -23,11 +23,6 @@ repos:
         additional_dependencies:
           - toml
           - tomli
-#  #- repo: https://github.com/myint/docformatter
-#  - repo: https://github.com/PyCQA/docformatter
-#    rev: v1.7.5
-#    hooks:
-#      - id: docformatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
     hooks:
@@ -44,6 +39,3 @@ repos:
       - id: nbqa-yapf
         additional_dependencies: [toml, yapf]
         types_or: [jupyter]
-      #- id: nbqa-ruff
-      #  args: [--fix, --ignore=E402]
-      #  types_or: [jupyter]

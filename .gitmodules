@@ -1,6 +1,6 @@
-[submodule "examples"]
-	path = examples
-	url = https://github.com/MALES-project/examples_speckcn2
-[submodule "tests/test_data"]
-	path = tests/test_data
-	url = https://github.com/MALES-project/test_data.git
+[submodule "energy_consumption"]
+	path = energy_consumption
+	url = git@github.com:Kirchhoff-Machines/rkm_energy.git
+[submodule "datasets"]
+	path = datasets
+	url = git@github.com:Kirchhoff-Machines/datasets.git
