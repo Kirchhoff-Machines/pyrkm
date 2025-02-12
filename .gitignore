@@ -7,6 +7,8 @@ tasks.json
 .mypy_cache/
 .mypy*
 
+.pytest_cache/
+
 tMp/
 __pycache__/
 build/
@@ -20,3 +22,4 @@ pyrkm.egg-info/
 
 model_measures/
 model_states/
+classifier_states/

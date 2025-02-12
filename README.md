@@ -14,7 +14,17 @@
 -->
 
 # pyrkm:
-### Emergent unsupervised learning with adaptive resistor networks: The Restricted Kirchhoff Machine 
+### Emergent unsupervised learning with adaptive resistor networks: The Restricted Kirchhoff Machine
+
+TODO:
+- [ ] Create a proper README
+- [ ] Make a logo
+- [ ] Build the documentation
+- [ ] fix CONTRIBUTING.md
+- [ ] fix CODE_OF_CONDUCT.md
+- [ ] set up pypi publishing
+- [ ] track on Zenodo
+- [ ] improve example.ipynb
 
 ![Graphical abstract](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/src/speckcn2/assets/cn2_profile.gif?raw=true)
 

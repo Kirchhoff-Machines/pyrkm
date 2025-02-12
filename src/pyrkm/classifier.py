@@ -115,12 +115,12 @@ def train_classifier(test_set: Tuple,
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Create directory for saving model states
-    os.makedirs('classifier_state', exist_ok=True)
+    os.makedirs('classifier_states', exist_ok=True)
 
     # Load the latest model state if it exists
     start_epoch = 0
     for epoch in range(num_epochs, 0, -1):
-        model_path = f'classifier_state/model_epoch_{epoch}.pth'
+        model_path = f'classifier_states/model_epoch_{epoch}.pth'
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path)
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -161,7 +161,7 @@ def train_classifier(test_set: Tuple,
             {
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-            }, f'classifier_state/model_epoch_{epoch+1}.pth')
+            }, f'classifier_states/model_epoch_{epoch+1}.pth')
 
     # Evaluation
     model.eval()
