@@ -1,5 +1,5 @@
 [![Python application test](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml/badge.svg)](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/SCiarella/ee30d5a40792fc1de92e9dcf0d0e092a/raw/covbadge.json)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/SCiarella/07cc3e145e56231a59fde8156485519b/raw/coverage_pyrkm.json)
 [![Documentation Status](https://readthedocs.org/projects/gemdat/badge/?version=latest)](https://males-project.github.io/SpeckleCn2Profiler/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speckcn2)](https://pypi.org/project/speckcn2/)
 [![PyPI](https://img.shields.io/pypi/v/speckcn2)](https://pypi.org/project/speckcn2/)

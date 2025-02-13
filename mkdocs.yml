@@ -1,31 +1,24 @@
-site_name: Speckcn2
-site_url: https://github.com/MALES-project/SpeckleCn2Profiler
-repo_url: https://github.com/MALES-project/SpeckleCn2Profiler
-repo_name: Speckcn2
+site_name: pyrkm
+site_url: https://github.com/Kirchhoff-Machines/pyrkm
+repo_url: https://github.com/Kirchhoff-Machines/pyrkm
+repo_name: pyrkm
 
 nav:
   - Home: index.md
   - Installation: installation.md
   - Examples:
-    - Input data: examples/input_data.md
-    - How to run: examples/run.md
+    - 1: examples/input_data.md
   - Python API:
-    - speckcn2: api/api.md
-    - Models: api/models.md
-    - I/O: api/io.md
-    - MLOps: api/mlops.md
-    - Loss: api/loss.md
-    - Normalizer: api/normalizer.md
-    - Plot: api/plot.md
-    - Preprocess: api/preprocess.md
-    - Postprocess: api/postprocess.md
-    - Utils: api/utils.md
-    - SCNN: api/scnn.md
-    - Transformations: api/transformations.md
+    - pyrkm: api/api.md
+    - rbm: api/rbm.md
+    - rkm: api/rkm.md
+    - utils: api/utils.md
+    - circuit_utils: api/circuit_utils.md
+    - classifier: api/classifier.md
   - Contributing: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
-  - 🔗 Source code: https://github.com/MALES-project/SpeckleCn2Profiler
-  - 🔗 Issues: https://github.com/MALES-project/SpeckleCn2Profiler/issues
+  - 🔗 Source code: https://github.com/Kirchhoff-Machines/pyrkm
+  - 🔗 Issues: https://github.com/Kirchhoff-Machines/pyrkm/issues
 
 theme:
   name: material

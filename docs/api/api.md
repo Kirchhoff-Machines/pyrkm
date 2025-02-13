@@ -1,11 +1,11 @@
-The main API of the `speckcn2` package is composed of the following modules:
+The main API of the `pyrkm` package is composed of the following modules:
 
-- **speckcn2.preprocess**: contains the functions to preprocess the data before training the model.
+- **pyrkm.rbm**: contains the class corresponding to standard RBMs with corresponding methods for training and analysis.
 
-- **speckcn2.models**: contains the classes that define the model architecture. In particular we support `ResNet` and `SCNN` based architectures.
+- **pyrkm.rkm**: contains the class corresponding to the Restricted Kirchhoff Machine (RKM) with corresponding methods for training and analysis.
 
-- **speckcn2.mlops**: contains the functions to perform operations involving the models, where the most important are:
-    - [speckcn2.mlops.train][speckcn2.mlops.train]
-    - [speckcn2.mlops.score][speckcn2.mlops.score]
+- **pyrkm.utils**: contains utility functions for data processing and visualization.
 
-- **speckcn2.plot**: contains the functions to plot the results of the model.
+- **pyrkm.circuit_utils**: contains utility functions for computations related to electrical circuits.
+
+- **pyrkm.classifier**: contains the class corresponding to a simple CNN classifier, used in some of the utils.
