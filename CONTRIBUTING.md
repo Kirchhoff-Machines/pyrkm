@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-Welcome! *SpeckCn2* is an open-source project for the analysis of speckle patterns. If you're trying *SpeckCn2* with your data, your experience, questions, bugs you encountered, and suggestions for improvement are important to the success of the project.
+Welcome! *pyrkm* is an open-source project for the analysis of speckle patterns. If you're trying *pyrkm* with your data, your experience, questions, bugs you encountered, and suggestions for improvement are important to the success of the project.
 
 We have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
@@ -33,19 +33,19 @@ Typically this means:
 5. Pushing the code back to Github
 6. [Create a new Pull Request](https://help.github.com/articles/creating-a-pull-request/)
 
-One of the code owners will review your code and request changes if needed. Once your changes have been approved, your contributions will become part of *SpeckCn2*. 🎉
+One of the code owners will review your code and request changes if needed. Once your changes have been approved, your contributions will become part of *pyrkm*. 🎉
 
 ## Getting started with development
 
 ### Setup
 
-*SpeckCn2* targets Python 3.9 or newer.
+*pyrkm* targets Python 3.9 or newer.
 
-Clone the repository into the `speckcn2` directory:
+Clone the repository into the `pyrkm` directory:
 
 ```console
-git clone https://github.com/MALES-project/SpeckleCn2Profiler speckcn2
-cd speckcn2
+git clone https://github.com/MALES-project/SpeckleCn2Profiler pyrkm
+cd pyrkm
 ```
 
 Initialize all submodules:
@@ -64,14 +64,14 @@ python3 -m pip install -e .[develop]
 Alternatively, install using Conda:
 
 ```console
-conda create -n speckcn2 python=3.10
-conda activate speckcn2
+conda create -n pyrkm python=3.10
+conda activate pyrkm
 pip install -e .[develop]
 ```
 
 ### Running tests
 
-SpeckCn2 uses [pytest](https://docs.pytest.org/en/latest/) to run the tests. You can run the tests for yourself using:
+pyrkm uses [pytest](https://docs.pytest.org/en/latest/) to run the tests. You can run the tests for yourself using:
 
 ```console
 pytest
@@ -113,6 +113,6 @@ If you are adding new pages, make sure to update the listing in the [`mkdocs.yml
 
 2. Under 'Choose a tag', set the tag to the new version. The versioning scheme we use is [SemVer](http://semver.org/), so bump the version (*major*/*minor*/*patch*) as needed. Bumping the version is handled transparently by `bumpversion` in [this workflow](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/.github/workflows/publish.yaml).
 
-3. The [upload to pypi](https://pypi.org/project/speckcn2) is triggered when a release is published and handled by [this workflow](https://github.com/MALES-project/SpeckleCn2Profiler/actions/workflows/publish.yaml).
+3. The [upload to pypi](https://pypi.org/project/pyrkm) is triggered when a release is published and handled by [this workflow](https://github.com/MALES-project/SpeckleCn2Profiler/actions/workflows/publish.yaml).
 
 4. The [upload to zenodo](https://zenodo.org/records/14178688) is triggered when a release is published.

@@ -1,8 +1,8 @@
 [![Python application test](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml/badge.svg)](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/SCiarella/07cc3e145e56231a59fde8156485519b/raw/coverage_pyrkm.json)
-[![Documentation Status](https://readthedocs.org/projects/gemdat/badge/?version=latest)](https://males-project.github.io/SpeckleCn2Profiler/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speckcn2)](https://pypi.org/project/speckcn2/)
-[![PyPI](https://img.shields.io/pypi/v/speckcn2)](https://pypi.org/project/speckcn2/)
+[![Documentation Status](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/docs.yaml/badge.svg)](https://kirchhoff-machines.github.io/pyrkm/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyrkm)](https://pypi.org/project/pyrkm/)
+[![PyPI](https://img.shields.io/pypi/v/pyrkm)](https://pypi.org/project/pyrkm/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11447920.svg)](https://doi.org/10.5281/zenodo.11447920)
 
 ![pyrkm banner](https://raw.githubusercontent.com/Kirchhoff-Machines/pyrkm/main/src/pyrkm/assets/logo-black.png#gh-light-mode-only)
@@ -41,14 +41,14 @@ For more information about the capabilities of the RKM, see the original paper b
 To get started with the project, follow these steps:
 
 - **Prerequisites:**
-  In order to correctly install `speckcn2` you need `python3.9` or higher. If you don't have it installed, you can download it from the [official website](https://www.python.org/downloads/). You will also need the header files that are required to compile Python extensions and are contained in `python3-dev`. On Ubuntu, you can install them with:
+  In order to correctly install `pyrkm` you need `python3.9` or higher. If you don't have it installed, you can download it from the [official website](https://www.python.org/downloads/). You will also need the header files that are required to compile Python extensions and are contained in `python3-dev`. On Ubuntu, you can install them with:
   ```bash
   apt-get install python3-dev
   ```
 
 - **Install the package:**
    ```bash
-   python -m pip install speckcn2
+   python -m pip install pyrkm
    ```
 
 - **Or: Clone the repository:**
@@ -68,9 +68,9 @@ To use the package, you run the commands such as:
 python <mycode.py> <path_to_config.yml>
 ```
 
-where `<mycode.py>` is the name of the script that trains/uses the `speckcn2` model and `<path_to_config.yml>` is the path to the configuration file.
+where `<mycode.py>` is the name of the script that trains/uses the `pyrkm` model and `<path_to_config.yml>` is the path to the configuration file.
 
-[Here](https://males-project.github.io/SpeckleCn2Profiler/examples/run) you can find a typical example run and an explanation of all the main configuration parameter. In the [example submodule](https://github.com/MALES-project/examples_speckcn2/) you can find multiple examples and multiple configuration to take inspiration from.
+[Here](https://males-project.github.io/SpeckleCn2Profiler/examples/run) you can find a typical example run and an explanation of all the main configuration parameter. In the [example submodule](https://github.com/MALES-project/examples_pyrkm/) you can find multiple examples and multiple configuration to take inspiration from.
 
 ## What can we predict?
 
