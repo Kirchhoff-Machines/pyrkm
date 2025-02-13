@@ -72,8 +72,8 @@ jobs:
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
         auth: ${{ secrets.GIST_SECRET }}
-        gistID: ee30d5a40792fc1de92e9dcf0d0e092a
-        filename: covbadge.json
+        gistID: 07cc3e145e56231a59fde8156485519b
+        filename: coverage_pyrkm.json
         label: Coverage
         message: ${{ env.total }}%
         minColorRange: 50
