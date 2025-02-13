@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
+from .utils import ensure_dir
+
 
 @dataclass
 class RBM:
@@ -137,6 +139,7 @@ class RBM:
         model_state_path : str, optional
             The path to the directory containing the model states (default is 'model_states/').
         """
+        ensure_dir(model_state_path)
         filename_list = glob.glob(model_state_path +
                                   '{}_t*.pkl'.format(pretrained_model))
         if len(filename_list) > 0:
@@ -496,6 +499,7 @@ class RBM:
                 self.epoch += 1
 
                 if self.epoch in self.t_to_save:
+                    ensure_dir(model_state_path)
                     with open(
                             model_state_path +
                             '{}_t{}.pkl'.format(self.model_name, self.epoch),

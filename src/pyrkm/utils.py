@@ -483,3 +483,15 @@ def binarize_image(image, threshold=128):
     """
     binary_image = (image > threshold).astype(int)
     return binary_image
+
+
+def ensure_dir(dirname):
+    """Create a directory if it does not exist.
+
+    Parameters
+    ----------
+    dirname : str
+        The name of the directory to create.
+    """
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)

@@ -12,6 +12,7 @@ from .utils import (
     PowerSpectrum_MSE,
     Third_moment_error,
     binarize_image,
+    ensure_dir,
     generate_S_matrix,
     generate_synthetic_data,
     getbasebias,
@@ -27,5 +28,5 @@ __all__ = [
     'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
     'ComputeAATS', 'Compute_FID', 'Compute_S', 'generate_S_matrix',
     'generate_synthetic_data', 'my_entropy', 'binarize_image', 'CustomDataset',
-    'SimpleClassifier', 'train_classifier', 'show_classification'
+    'SimpleClassifier', 'train_classifier', 'show_classification', 'ensure_dir'
 ]

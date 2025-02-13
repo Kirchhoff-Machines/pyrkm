@@ -11,6 +11,7 @@ import numpy as np
 import torch
 
 from .rbm import RBM
+from .utils import ensure_dir
 
 
 @dataclass
@@ -87,6 +88,7 @@ class RKM(RBM):
             Path to the model states, by default 'model_states/'.
         """
         # Check if you have model load points
+        ensure_dir(model_state_path)
         filename_list = glob.glob(model_state_path +
                                   '{}_t*.pkl'.format(pretrained_model))
         if len(filename_list) > 0:
@@ -550,6 +552,7 @@ class RKM(RBM):
 
                 # Store the model state
                 if self.epoch in self.t_to_save:
+                    ensure_dir(model_state_path)
                     with open(
                             model_state_path +
                             '{}_t{}.pkl'.format(self.model_name, self.epoch),
