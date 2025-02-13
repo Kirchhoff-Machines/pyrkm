@@ -1,16 +1,16 @@
-[![Python application test](https://github.com/MALES-project/SpeckleCn2Profiler/actions/workflows/test.yaml/badge.svg)](https://github.com/MALES-project/SpeckleCn2Profiler/actions/workflows/test.yaml)
+[![Python application test](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml/badge.svg)](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/test.yaml)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/SCiarella/ee30d5a40792fc1de92e9dcf0d0e092a/raw/covbadge.json)
 [![Documentation Status](https://readthedocs.org/projects/gemdat/badge/?version=latest)](https://males-project.github.io/SpeckleCn2Profiler/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speckcn2)](https://pypi.org/project/speckcn2/)
 [![PyPI](https://img.shields.io/pypi/v/speckcn2)](https://pypi.org/project/speckcn2/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11447920.svg)](https://doi.org/10.5281/zenodo.11447920)
 
-![MALES banner](https://raw.githubusercontent.com/MALES-project/SpeckleCn2Profiler/main/src/speckcn2/assets/logo_on_white.png#gh-light-mode-only)
-![MALES banner](https://raw.githubusercontent.com/MALES-project/SpeckleCn2Profiler/main/src/speckcn2/assets/logo_on_black.png#gh-dark-mode-only)
+![pyrkm banner](https://raw.githubusercontent.com/Kirchhoff-Machines/pyrkm/main/src/pyrkm/assets/logo-black.png#gh-light-mode-only)
+![pyrkm banner](https://raw.githubusercontent.com/Kirchhoff-Machines/pyrkm/main/src/pyrkm/assets/logo-white.png#gh-dark-mode-only)
 
 <!---
-![MALES banner](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/speckcn2/assets/logo_on_white.png#gh-light-mode-only)
-![MALES banner](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/speckcn2/assets/logo_on_black.png#gh-dark-mode-only)
+![pyrkm banner](https://github.com/Kirchhoff-Machines/pyrkm/blob/main/pyrkm/assets/logo-black.png#gh-light-mode-only)
+![pyrkm banner](https://github.com/Kirchhoff-Machines/pyrkm/blob/main/pyrkm/assets/logo-white.png#gh-dark-mode-only)
 -->
 
 # pyrkm:
@@ -26,7 +26,10 @@ TODO:
 - [ ] track on Zenodo
 - [ ] improve example.ipynb
 
-![Graphical abstract](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/src/speckcn2/assets/cn2_profile.gif?raw=true)
+## What is a Restricted Kirchhoff Machine?
+You may be familiar with Restricted Boltzmann Machines (RBMs) [[1](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.35.1792)]-[[2](https://www.science.org/doi/10.1126/science.1127647)], which are a type of generative neural network that can learn a probability distribution over its input data. The Restricted Kirchhoff Machine (RKM) is a realization of a RBM using resistor networks, and Kirchhoff's laws of electrical circuits.
+
+For more information about the capabilities of the RKM, see the original paper by [Link to paper](https://google.com).
 
 ## Overview
 
