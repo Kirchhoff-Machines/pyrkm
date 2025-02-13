@@ -41,6 +41,11 @@ jobs:
         path: ${{ env.pythonLocation }}
         key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ matrix.os }}-${{ matrix.python-version }}
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .[develop]
+
     - name: Clean Pytest Cache
       run: rm -rf .pytest_cache
 
