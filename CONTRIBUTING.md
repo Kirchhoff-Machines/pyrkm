@@ -6,13 +6,13 @@ We have a [Code of Conduct](CODE_OF_CONDUCT.md), please follow it in all your in
 
 ## Questions, feedback, bugs
 
-Use the search function to see if someone else already ran across the same issue. Feel free to open a new [issue here](https://github.com/MALES-project/SpeckleCn2Profiler/issues) to ask a question, suggest improvements/new features, or report any bugs that you ran into.
+Use the search function to see if someone else already ran across the same issue. Feel free to open a new [issue here](https://github.com/Kirchhoff-Machines/pyrkm/issues) to ask a question, suggest improvements/new features, or report any bugs that you ran into.
 
 ## Submitting changes
 
 Even better than a good bug report is a fix for the bug or the implementation of a new feature. We welcome any contributions that help improve the code.
 
-When contributing to this repository, please first discuss the change you wish to make via an [issue](https://github.com/MALES-project/SpeckleCn2Profiler/issues) with the owners of this repository before making a change.
+When contributing to this repository, please first discuss the change you wish to make via an [issue](https://github.com/Kirchhoff-Machines/pyrkm/issues) with the owners of this repository before making a change.
 
 Contributions can come in the form of:
 
@@ -44,7 +44,7 @@ One of the code owners will review your code and request changes if needed. Once
 Clone the repository into the `pyrkm` directory:
 
 ```console
-git clone https://github.com/MALES-project/SpeckleCn2Profiler pyrkm
+git clone https://github.com/Kirchhoff-Machines/pyrkm.git
 cd pyrkm
 ```
 
@@ -104,15 +104,15 @@ pip install -e .[docs]
 mkdocs serve
 ```
 
-You can find the documentation source in the [docs](https://github.com/MALES-project/SpeckleCn2Profiler/tree/main/docs) directory.
-If you are adding new pages, make sure to update the listing in the [`mkdocs.yml`](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/mkdocs.yml) under the `nav` entry.
+You can find the documentation source in the [docs](https://github.com/Kirchhoff-Machines/pyrkm/tree/main/docs) directory.
+If you are adding new pages, make sure to update the listing in the [`mkdocs.yml`](https://github.com/Kirchhoff-Machines/pyrkm/blob/main/mkdocs.yml) under the `nav` entry.
 
 ### Making a release
 
-1. Make a new [release](https://github.com/MALES-project/SpeckleCn2Profiler/releases).
+1. Make a new [release](https://github.com/Kirchhoff-Machines/pyrkm/releases).
 
-2. Under 'Choose a tag', set the tag to the new version. The versioning scheme we use is [SemVer](http://semver.org/), so bump the version (*major*/*minor*/*patch*) as needed. Bumping the version is handled transparently by `bumpversion` in [this workflow](https://github.com/MALES-project/SpeckleCn2Profiler/blob/main/.github/workflows/publish.yaml).
+2. Under 'Choose a tag', set the tag to the new version. The versioning scheme we use is [SemVer](http://semver.org/), so bump the version (*major*/*minor*/*patch*) as needed. Bumping the version is handled transparently by `bumpversion` in [this workflow](https://github.com/Kirchhoff-Machines/pyrkm/blob/main/.github/workflows/publish.yaml).
 
-3. The [upload to pypi](https://pypi.org/project/pyrkm) is triggered when a release is published and handled by [this workflow](https://github.com/MALES-project/SpeckleCn2Profiler/actions/workflows/publish.yaml).
+3. The [upload to pypi](https://pypi.org/project/pyrkm) is triggered when a release is published and handled by [this workflow](https://github.com/Kirchhoff-Machines/pyrkm/actions/workflows/publish.yaml).
 
 4. The [upload to zenodo](https://zenodo.org/records/14178688) is triggered when a release is published.

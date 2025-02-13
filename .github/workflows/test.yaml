@@ -76,6 +76,6 @@ jobs:
         filename: coverage_pyrkm.json
         label: Coverage
         message: ${{ env.total }}%
-        minColorRange: 50
-        maxColorRange: 90
+        minColorRange: 20
+        maxColorRange: 70
         valColorRange: ${{ env.total }}
