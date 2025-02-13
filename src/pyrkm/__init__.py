@@ -22,7 +22,7 @@ from .utils import (
     show_and_save,
 )
 
-__version__ = '0.0.1'
+__version__ = '0.0.7'
 __all__ = [
     'RBM', 'RKM', 'load_model', 'show_and_save', 'make_grid', 'getbasebias',
     'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
