@@ -7,6 +7,7 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - How to use: examples/first_example.ipynb
+  - Energy consumption: energy_consumption.md
   - Python API:
     - pyrkm: api/api.md
     - RBM class : api/rbm.md
