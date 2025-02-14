@@ -9,7 +9,9 @@ For the purpose of the study XXX, we consider only the energy consumed by: (i) t
 ## Tools and Limitations
 
 To capture the energy consumed by the computer, we use the following tools:
+
 * `pyRAPL`: a [Python package](https://pyrapl.readthedocs.io/en/latest/) that uses Intel's “Running Average Power Limit” (RAPL) technology to estimate CPU power consumption. This technology is available on Intel CPUs since the Sandy Bridge generation.
+
 * `nvidia-smi`: the [standard](https://developer.nvidia.com/system-management-interface) NVIDIA System Management Interface to measure GPU energy consumption.
 
 This submodule can measure the energy consumption of both the CPU and the GPU, but it is limited to Intel CPUs and NVIDIA GPUs.
