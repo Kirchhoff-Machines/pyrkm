@@ -44,7 +44,7 @@ To get started with the project, follow these steps:
 
 ## Usage
 
-To use the package, you can follow the example.
+To learn how to use the package, follow the [official documentation](https://kirchhoff-machines.github.io/pyrkm/) and in particular [this tutorial](link).
 
 ## Contribution Guidelines
 
