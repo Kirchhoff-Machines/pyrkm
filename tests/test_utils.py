@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pickle
+
 import numpy as np
 import pytest
 import torch
@@ -16,6 +18,7 @@ from pyrkm.utils import (
     generate_synthetic_data,
     getbasebias,
     my_entropy,
+    unpickle,
 )
 
 
@@ -95,3 +98,15 @@ def test_binarize_image():
     image = np.random.randint(0, 255, (28, 28))
     result = binarize_image(image)
     assert result.shape == image.shape
+
+
+def test_unpickle():
+    tmp_path = 'tests/'
+
+    sample_data = {'key': 'value'}
+    sample_file = tmp_path + 'sample.pkl'
+    with open(sample_file, 'wb') as f:
+        pickle.dump(sample_data, f)
+
+    result = unpickle(sample_file)
+    assert result == sample_data

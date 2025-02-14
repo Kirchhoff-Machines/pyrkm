@@ -6,8 +6,7 @@ repo_name: pyrkm
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Examples:
-    - 1: examples/input_data.md
+  - How to use: examples/first_example.ipynb
   - Python API:
     - pyrkm: api/api.md
     - rbm: api/rbm.md

@@ -15,6 +15,54 @@ from .utils import ensure_dir
 
 @dataclass
 class RBM:
+    """A class to represent a Restricted Boltzmann Machine (RBM).
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model.
+    n_visible : int
+        The number of visible units.
+    n_hidden : int
+        The number of hidden units.
+    k : int, optional
+        The number of Gibbs sampling steps (default is 1).
+    lr : float, optional
+        The learning rate.
+    max_epochs : int, optional
+        The maximum number of training epochs.
+    energy_type : str, optional
+        The type of energy function to use (default is 'hopfield').
+    optimizer : str, optional
+        The optimizer to use (default is 'SGD', but also Adam is available).
+    batch_size : int, optional
+        The batch size for training (default is 1).
+    train_algo : str, optional
+        The training algorithm to use between Contrastive Divergence (CD), Persistent
+        Contrastive Divergence (PCD), visible-random (default, vRDM), hidden-random (hRDM).
+    average_data : torch.tensor, optional
+        The average data tensor for centering and initialization (default is None).
+    model_beta : int, optional
+        The inverse temperature parameter (default is 1).
+    mytype : type, optional
+        The data type for tensors (default is torch.float32).
+    min_W : float, optional
+        The minimum weight value used for clipping (default is -10).
+    max_W : float, optional
+        The maximum weight value used for clipping (default is 10).
+    regularization : bool, optional
+        Whether to use L1+L2 regularization (default is False).
+    l1_factor : float, optional
+        The L1 regularization factor.
+    l2_factor : float, optional
+        The L2 regularization factor.
+    centering : bool, optional
+        Whether to use centering (default is False).
+    g_v : float, optional
+        The visible unit gain, required for gradient centering (default is 0.5).
+    g_h : float, optional
+        The hidden unit gain, required for gradient centering (default is 0.5).
+    """
     model_name: str
     n_visible: int
     n_hidden: int

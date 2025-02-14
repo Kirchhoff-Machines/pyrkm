@@ -13,11 +13,13 @@
 ## What is a Restricted Kirchhoff Machine?
 You may be familiar with Restricted Boltzmann Machines (RBMs) [[1](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.35.1792)]-[[2](https://www.science.org/doi/10.1126/science.1127647)], which are a type of generative neural network that can learn a probability distribution over its input data. The Restricted Kirchhoff Machine (RKM) is a realization of a RBM using resistor networks, and Kirchhoff's laws of electrical circuits.
 
-For more information about the capabilities of the RKM, see the original paper by [Link to paper](https://google.com).
-
-## Overview
+For more information about the capabilities of the RKM, see the original paper by [Link to paper XXXX](https://google.com).
 
 ## Repository Contents
+In this repository you will find the following:
+
+- `src/pyrkm/`: The main package code. You can use this code to train and evaluate RKMs. For more information, see the [documentation](https://kirchhoff-machines.github.io/pyrkm/). For a quick start, see the [Usage](#Usage) section below.
+- `energy_consumption`: A series of scripts to evaluate the energy consumption of the RKM. They are used to generate the results in the [paper XXX](https://google.com).
 
 ## Getting Started
 

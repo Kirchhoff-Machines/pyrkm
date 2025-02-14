@@ -20,6 +20,7 @@ from .utils import (
     make_grid,
     my_entropy,
     show_and_save,
+    unpickle,
 )
 
 __version__ = '0.0.7'
@@ -28,5 +29,6 @@ __all__ = [
     'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
     'ComputeAATS', 'Compute_FID', 'Compute_S', 'generate_S_matrix',
     'generate_synthetic_data', 'my_entropy', 'binarize_image', 'CustomDataset',
-    'SimpleClassifier', 'train_classifier', 'show_classification', 'ensure_dir'
+    'SimpleClassifier', 'train_classifier', 'show_classification',
+    'ensure_dir', 'unpickle'
 ]

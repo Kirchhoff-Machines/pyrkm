@@ -16,31 +16,28 @@ from .utils import ensure_dir
 
 @dataclass
 class RKM(RBM):
-    model_name: str
-    n_visible: int
-    n_hidden: int
-    k: int = 1
-    lr: float = 0.001
-    max_epochs: int = 200000
+    """A class to represent a Restricted Kirchhoff Machine (RKM).
+    It is inherited from the RBM class, so look at the RBM class for info about the attributes and methods.
+    Also, refer to the paper XXX for more details on the RKM.
+
+    Parameters
+    ----------
+    energy_type : str, optional
+        The type of energy function to use (default is 'RKM').
+    offset : float, optional
+        Offset parameter for the energy function (default is 0.0).
+    sampling : str, optional
+        Sampling method to use (default is 'bernoulli').
+    distribution : str, optional
+        Distribution to use for sampling (default is 'gaussian').
+    layer_scaled : bool, optional
+        Whether to scale the layer by the number of units (default is True).
+    """
     energy_type: str = 'RKM'
-    optimizer: str = 'SGD'
-    regularization: bool = False
-    l1_factor: float = 0
-    l2_factor: float = 1e-3
-    g_v: float = 1.0
-    g_h: float = 1.0
     offset: float = 0.0
-    batch_size: int = 1
-    train_algo: str = 'PCD'
-    centering: bool = False
-    average_data: torch.tensor = None
-    model_beta: int = 1
-    mytype: type = torch.float32
     sampling: str = 'bernoulli'
     distribution: str = 'gaussian'
     layer_scaled: bool = True
-    min_W = -10
-    max_W = 10
 
     def __post_init__(self):
         """Initialize the RKM model after the dataclass is created."""

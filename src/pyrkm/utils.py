@@ -495,3 +495,16 @@ def ensure_dir(dirname):
     """
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
+
+def unpickle(file):
+    """Unpickle a file.
+
+    Parameters
+    ----------
+    file : str
+        The file to unpickle.
+    """
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict
