@@ -1,7 +1,7 @@
 # This CITATION.cff file was generated with cffinit.
 # Visit https://bit.ly/cffinit to generate yours today!
 
-cff-version: 0.0.7
+cff-version: 0.0.8
 title: pyrkm
 message: >-
   If you use this software, please cite it using the
@@ -27,4 +27,4 @@ keywords:
   - physical learning
   - equilibrium propagation
 license: Apache-2.0
-version: 0.0.7
+version: 0.0.8

@@ -23,7 +23,7 @@ from .utils import (
     unpickle,
 )
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 __all__ = [
     'RBM', 'RKM', 'load_model', 'show_and_save', 'make_grid', 'getbasebias',
     'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
