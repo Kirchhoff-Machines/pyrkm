@@ -108,9 +108,12 @@ class RBM:
             (self.n_hidden, self.n_visible),
             dtype=self.mytype,
             device=self.device) * 0.1 / np.sqrt(self.n_visible)
-        self.v_bias = torch.randn((self.n_visible, ),
-                                  dtype=self.mytype,
-                                  device=self.device)
+        if self.average_data is not None:
+            self.v_bias = self.average_data.to(self.device).to(self.mytype)
+        else:
+            self.v_bias = torch.randn((self.n_visible, ),
+                                      dtype=self.mytype,
+                                      device=self.device)
         self.h_bias = torch.zeros((self.n_hidden, ),
                                   dtype=self.mytype,
                                   device=self.device)
