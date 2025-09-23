@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 [project]
 name = "pyrkm"
-version = "0.0.8"
+version = "0.1.0"
 description = "Machines learning to do machine-learning"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -115,7 +115,7 @@ ignore_missing_imports = true
 
 
 [tool.bumpversion]
-current_version = "0.0.8"
+current_version = "0.1.0"
 
 [[tool.bumpversion.files]]
 filename = "src/pyrkm/__init__.py"
