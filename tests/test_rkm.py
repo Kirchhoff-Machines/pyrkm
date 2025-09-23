@@ -40,7 +40,7 @@ def test_initialization(rbm):
 
 
 def test_forward_pass(rbm):
-    v = torch.randint(0, 2, (rbm.batch_size, rbm.n_visible)).float()
+    v = torch.randint(0, 2, (rbm.batch_size, rbm.n_visible)).float().to(rbm.device)
     v_model = rbm.forward(v, rbm.k)
     assert v_model.shape == v.shape
 
@@ -52,7 +52,7 @@ def test_reconstruction(rbm):
 
 
 def test_train_step(rbm):
-    train_data = [torch.randint(0, 2, (rbm.batch_size, rbm.n_visible)).float()]
+    train_data = [torch.randint(0, 2, (rbm.batch_size, rbm.n_visible)).float().to(rbm.device)]
     rbm.train(train_data,
               print_error=False,
               print_test_error=False,

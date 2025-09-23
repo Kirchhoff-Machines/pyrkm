@@ -2,9 +2,9 @@
 
 ## Overview
 
-This documentation provides an overview of the `energy_consumption` [submodule](https://github.com/Kirchhoff-Machines/rkm_energy) and its components. The submodule is designed to handle various measurements related to energy consumption and to produce the data reported in the paper XXX.
+This documentation provides an overview of the `energy_consumption` [submodule](https://github.com/Kirchhoff-Machines/rkm_energy) and its components. The submodule is designed to handle various measurements related to energy consumption and to produce the data reported in the [paper](https://arxiv.org/abs/2509.15842).
 
-For the purpose of the study XXX, we consider only the energy consumed by: (i) the **circuit structure** of the RKM, which can be measured analytically using Kirchhoff's laws, and (ii) the **matrix multiplication on a computer**, the simplest operation behind the RKM, for which we introduce specific tools in this submodule.
+For the purpose of the [study](https://arxiv.org/abs/2509.15842), we consider only the energy consumed by: (i) the **circuit structure** of the RKM, which can be measured analytically using Kirchhoff's laws, and (ii) the **matrix multiplication on a computer**, the simplest operation behind the RKM, for which we introduce specific tools in this submodule.
 
 ## Tools and Limitations
 
@@ -18,7 +18,7 @@ This submodule can measure the energy consumption of both the CPU and the GPU, b
 
 ## Content of the Submodule
 
-In the `src/` directory, you will find several files to analyze the energy consumption of matrix multiplication as a function of the number of hidden nodes `Nh` of the machine. Running these codes will produce images in `out_png` and store data in `out_csv`. We include the images and data used to produce the results in XXX.
+In the `src/` directory, you will find several files to analyze the energy consumption of matrix multiplication as a function of the number of hidden nodes `Nh` of the machine. Running these codes will produce images in `out_png` and store data in `out_csv`. We include the images and data used to produce the results reported [here](https://arxiv.org/abs/2509.15842).
 
 The specific files for the analysis are:
 
