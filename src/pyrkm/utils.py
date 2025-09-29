@@ -5,6 +5,7 @@ import gzip
 import io
 import os
 import pickle
+from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,27 @@ import torch.fft as fft
 from scipy.linalg import sqrtm
 from scipy.optimize import fsolve
 from torchvision.models import inception_v3
+
+# Global cache for inception model to avoid reloading
+_inception_model_cache = None
+
+
+def get_inception_model(device):
+    """Get cached inception model or create new one if needed."""
+    global _inception_model_cache
+    if _inception_model_cache is None or _inception_model_cache[1] != device:
+        model = inception_v3(pretrained=True, transform_input=False).to(device)
+        model.eval()
+        # Compile model for faster inference if using recent PyTorch
+        try:
+            model = torch.jit.script(model)
+        except Exception:
+            print(
+                'Warning: Scripting Inception model failed, using unscripted version.'
+            )
+            pass  # Fall back to regular model if scripting fails
+        _inception_model_cache = (model, device)
+    return _inception_model_cache[0]
 
 
 def load_model(name, delete_previous=False, model_state_path='model_states/'):
@@ -261,8 +283,15 @@ def ComputeAATS(v, v_model):
     return AAtruth, AAsyn
 
 
-def Compute_FID(synthetic_images, real_images):
+# Global cache for real image statistics to enable automatic optimization
+_real_image_stats_cache: Dict = {}
+
+
+def Compute_FID(synthetic_images, real_images, dtype=torch.float64):
     """Compute the Frechet Inception Distance (FID) between synthetic and real images.
+
+    Automatically uses precomputed statistics
+    for efficiency when the same real images are used repeatedly.
 
     Parameters
     ----------
@@ -270,6 +299,8 @@ def Compute_FID(synthetic_images, real_images):
         The synthetic images.
     real_images : torch.Tensor
         The real images.
+    dtype : torch.dtype, optional
+        Data type for processing (default is torch.float64 for compatibility).
 
     Returns
     -------
@@ -277,48 +308,175 @@ def Compute_FID(synthetic_images, real_images):
         The FID score.
     """
     device = synthetic_images.device
-    inception_model = inception_v3(pretrained=True,
-                                   transform_input=False).to(device)
-    inception_model.eval()
+    inception_model = get_inception_model(device)
+    batch_size = 128  # Increased batch size for better performance
 
-    def preprocess_images(images):
-        images = images.reshape(-1, 28,
-                                28).unsqueeze(1).repeat(1, 3, 1,
-                                                        1).to(torch.float64)
+    def preprocess_images_batch(images, target_dtype):
+        """Optimized batch preprocessing with memory efficiency."""
+        images = images.reshape(-1, 28, 28).unsqueeze(1)
+        images = images.expand(-1, 3, -1, -1).to(target_dtype)
         images = torch.nn.functional.interpolate(images,
                                                  size=299,
                                                  mode='bilinear',
                                                  align_corners=False)
         return images
 
-    def get_activations(images):
-        images = preprocess_images(images)
-        with torch.no_grad():
-            return inception_model(images).detach().cpu().numpy()
+    def get_activations_batch(images, target_dtype):
+        """Process images in batches to avoid memory issues."""
+        activations = []
+        for i in range(0, images.shape[0], batch_size):
+            batch = images[i:i + batch_size]
+            batch = preprocess_images_batch(batch, target_dtype)
 
-    synthetic_images = synthetic_images.to(device)
-    real_images = torch.Tensor(real_images).to(device)
-    synthetic_activations = get_activations(synthetic_images)
-    real_activations = get_activations(real_images)
+            with torch.no_grad():
+                batch_output = inception_model(batch)
+                # Handle InceptionOutputs - extract logits if it's a named tuple
+                if hasattr(batch_output, 'logits'):
+                    batch_activations = batch_output.logits.detach()
+                else:
+                    batch_activations = batch_output.detach()
+                activations.append(batch_activations)
 
-    mu_synthetic = np.mean(synthetic_activations, axis=0)
-    mu_real = np.mean(real_activations, axis=0)
-    sigma_synthetic = np.cov(synthetic_activations, rowvar=False)
-    sigma_real = np.cov(real_activations, rowvar=False)
+            if torch.cuda.is_available() and i % (batch_size * 4) == 0:
+                torch.cuda.empty_cache()
 
-    epsilon = 1e-6
-    sigma_synthetic += np.eye(sigma_synthetic.shape[0]) * epsilon
-    sigma_real += np.eye(sigma_real.shape[0]) * epsilon
+        return torch.cat(activations, dim=0).cpu().numpy()
 
+    def compute_statistics(activations):
+        """Compute mean and covariance with numerical stability."""
+        mu = np.mean(activations, axis=0)
+        centered = activations - mu
+        sigma = np.cov(centered, rowvar=False)
+        epsilon = 1e-6
+        sigma += np.eye(sigma.shape[0]) * epsilon
+        return mu, sigma
+
+    # Create a hash for real images to check if we've seen them before
+    if isinstance(real_images, torch.Tensor):
+        real_images_np = real_images.detach().cpu().numpy()
+    else:
+        real_images_np = np.array(real_images)
+
+    # Simple hash based on shape and a sample of values for cache key
+    real_hash = hash(
+        (real_images_np.shape,
+         tuple(real_images_np.flat[::max(1, real_images_np.size // 100)])))
+
+    # Check if we have cached statistics for these real images
+    if real_hash in _real_image_stats_cache:
+        mu_real, sigma_real = _real_image_stats_cache[real_hash]
+    else:
+        # Compute real image statistics and cache them
+        real_images_tensor = torch.tensor(real_images_np,
+                                          device=device,
+                                          dtype=dtype)
+        real_activations = get_activations_batch(real_images_tensor, dtype)
+        mu_real, sigma_real = compute_statistics(real_activations)
+        _real_image_stats_cache[real_hash] = (mu_real, sigma_real)
+
+    # Always compute synthetic statistics (they change each time)
+    synthetic_images = synthetic_images.to(device).to(dtype)
+    synthetic_activations = get_activations_batch(synthetic_images, dtype)
+    mu_synthetic, sigma_synthetic = compute_statistics(synthetic_activations)
+
+    # Compute FID
     diff = mu_synthetic - mu_real
     ssdiff = np.sum(diff**2.0)
 
-    covmean = sqrtm(sigma_synthetic.dot(sigma_real))
-    if np.iscomplexobj(covmean):
-        covmean = covmean.real
+    # Use numerically stable matrix square root computation
+    try:
+        covmean = sqrtm(sigma_synthetic.dot(sigma_real))
+        if np.iscomplexobj(covmean):
+            covmean = covmean.real
+    except Exception:
+        u, s, vh = np.linalg.svd(sigma_synthetic.dot(sigma_real))
+        covmean = u.dot(np.diag(np.sqrt(np.maximum(s, 0)))).dot(vh)
 
     fid = ssdiff + np.trace(sigma_synthetic + sigma_real - 2.0 * covmean)
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     return fid
+
+
+def precompute_real_image_statistics(real_images,
+                                     dtype=torch.float32,
+                                     batch_size=64,
+                                     device=None):
+    """Precompute statistics for real images to speed up repeated FID calculations.
+
+    Use this when you'll compute FID multiple times with the same real dataset.
+
+    Parameters
+    ----------
+    real_images : torch.Tensor or numpy.ndarray
+        The real images dataset.
+    dtype : torch.dtype, optional
+        Data type for processing (default is torch.float32).
+    batch_size : int, optional
+        Batch size for processing (default is 64).
+    device : torch.device, optional
+        Device to use. If None, uses CUDA if available.
+
+    Returns
+    -------
+    tuple
+        (mu_real, sigma_real) - precomputed statistics for real images.
+    """
+    if device is None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    inception_model = get_inception_model(device)
+
+    # Convert to tensor if needed
+    if not isinstance(real_images, torch.Tensor):
+        real_images = torch.tensor(real_images, device=device)
+    else:
+        real_images = real_images.to(device)
+
+    def preprocess_images_batch(images, target_dtype):
+        images = images.reshape(-1, 28, 28).unsqueeze(1)
+        images = images.expand(-1, 3, -1, -1).to(target_dtype)
+        images = torch.nn.functional.interpolate(images,
+                                                 size=299,
+                                                 mode='bilinear',
+                                                 align_corners=False)
+        return images
+
+    # Get activations in batches
+    activations = []
+    for i in range(0, real_images.shape[0], batch_size):
+        batch = real_images[i:i + batch_size]
+        batch = preprocess_images_batch(batch, dtype)
+
+        with torch.no_grad():
+            batch_output = inception_model(batch)
+            # Handle InceptionOutputs - extract logits if it's a named tuple
+            if hasattr(batch_output, 'logits'):
+                batch_activations = batch_output.logits.detach()
+            else:
+                batch_activations = batch_output.detach()
+            activations.append(batch_activations)
+
+        if torch.cuda.is_available() and i % (batch_size * 4) == 0:
+            torch.cuda.empty_cache()
+
+    real_activations = torch.cat(activations, dim=0).cpu().numpy()
+
+    # Compute statistics
+    mu_real = np.mean(real_activations, axis=0)
+    real_centered = real_activations - mu_real
+    sigma_real = np.cov(real_centered, rowvar=False)
+
+    # Add regularization
+    epsilon = 1e-6
+    sigma_real += np.eye(sigma_real.shape[0]) * epsilon
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    return mu_real, sigma_real
 
 
 def Compute_S(v, v_gen):

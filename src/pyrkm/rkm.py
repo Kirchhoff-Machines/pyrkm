@@ -39,6 +39,11 @@ class RKM(RBM):
     distribution: str = 'gaussian'
     layer_scaled: bool = True
 
+    # Optional masking for fine-tuning (ignored by default)
+    W_mask: torch.Tensor = None
+    v_bias_mask: torch.Tensor = None
+    h_bias_mask: torch.Tensor = None
+
     def __post_init__(self):
         """Initialize the RKM model after the dataclass is created."""
         super().__post_init__()
@@ -556,7 +561,7 @@ class RKM(RBM):
                             'wb') as file:
                         pickle.dump(self, file)
 
-                if self.epoch % print_every == 0:
+                if self.verbose and self.epoch % print_every == 0:
                     t = time.time() - start_time
                     if print_error:
                         v_model = self.forward(v_data, 1)
@@ -579,7 +584,8 @@ class RKM(RBM):
                         print('Epoch: %d , time: %f' % (self.epoch, t),
                               flush=True)
 
-        print('*** Training finished', flush=True)
+        if self.verbose:
+            print('*** Training finished', flush=True)
 
     def after_step_keepup(self):
         """Perform operations after each training step."""
@@ -619,9 +625,22 @@ class RKM(RBM):
             dv -= self.l2 * 2 * self.v_bias
             dh -= self.l2 * 2 * self.h_bias
         elif self.regularization == 'l1':
-            dW -= self.l1 * torch.sign(self.W)
-            dv -= self.l1 * torch.sign(self.v_bias)
-            dh -= self.l1 * torch.sign(self.h_bias)
+            dW -= self.l1_factor * torch.sign(self.W)
+            dv -= self.l1_factor * torch.sign(self.v_bias)
+            dh -= self.l1_factor * torch.sign(self.h_bias)
+        elif self.regularization == 'l1_hidden_nodes':
+            # L1 regularization per hidden node - encourages hidden node sparsity
+            # Vectorized computation: apply L1 penalty to all hidden nodes at once
+            # W has shape [n_hidden, n_visible], sum along dim=1 to get L1 norm per hidden node
+            l1_norms_weights = torch.sum(torch.abs(self.W),
+                                         dim=1)  # Shape: [n_hidden]
+            l1_norms_bias = torch.abs(self.h_bias)  # Shape: [n_hidden]
+            l1_norms_h = l1_norms_weights + l1_norms_bias  # Both same shape: [n_hidden]
+            active_nodes = l1_norms_h > 0  # Boolean mask for active nodes
+            dW[active_nodes, :] -= self.l1_factor * torch.sign(
+                self.W[active_nodes, :])
+            dh[active_nodes] -= self.l1_factor * torch.sign(
+                self.h_bias[active_nodes])
         # Update parameters in-place
         # # and clip
         # gnorm = torch.norm(dW) + torch.norm(dv) + torch.norm(dh)
@@ -629,6 +648,14 @@ class RKM(RBM):
         self.W.add_(self.lr * dW)
         self.v_bias.add_(self.lr * dv)
         self.h_bias.add_(self.lr * dh)
+
+        # Apply masks if provided (for fine-tuning with weight suppression)
+        if self.W_mask is not None:
+            self.W.data[self.W_mask] = 0.0
+        if self.v_bias_mask is not None:
+            self.v_bias.data[self.v_bias_mask] = 0.0
+        if self.h_bias_mask is not None:
+            self.h_bias.data[self.h_bias_mask] = 0.0
 
     def Adam_update(self, t, dEdW_data, dEdW_model, dEdv_bias_data,
                     dEdv_bias_model, dEdh_bias_data, dEdh_bias_model):
@@ -664,9 +691,22 @@ class RKM(RBM):
             dv += self.l2 * 2 * self.v_bias
             dh += self.l2 * 2 * self.h_bias
         elif self.regularization == 'l1':
-            dW += self.l1 * torch.sign(self.W)
-            dv += self.l1 * torch.sign(self.v_bias)
-            dh += self.l1 * torch.sign(self.h_bias)
+            dW += self.l1_factor * torch.sign(self.W)
+            dv += self.l1_factor * torch.sign(self.v_bias)
+            dh += self.l1_factor * torch.sign(self.h_bias)
+        elif self.regularization == 'l1_hidden_nodes':
+            # L1 regularization per hidden node - encourages hidden node sparsity
+            # Vectorized computation: apply L1 penalty to all hidden nodes at once
+            # W has shape [n_hidden, n_visible], sum along dim=1 to get L1 norm per hidden node
+            l1_norms_weights = torch.sum(torch.abs(self.W),
+                                         dim=1)  # Shape: [n_hidden]
+            l1_norms_bias = torch.abs(self.h_bias)  # Shape: [n_hidden]
+            l1_norms_h = l1_norms_weights + l1_norms_bias  # Both same shape: [n_hidden]
+            active_nodes = l1_norms_h > 0  # Boolean mask for active nodes
+            dW[active_nodes, :] += self.l1_factor * torch.sign(
+                self.W[active_nodes, :])
+            dh[active_nodes] += self.l1_factor * torch.sign(
+                self.h_bias[active_nodes])
         # momentum beta1
         self.m_dW = self.beta1 * self.m_dW + (1 - self.beta1) * dW
         self.m_dv = self.beta1 * self.m_dv + (1 - self.beta1) * dv
@@ -689,6 +729,14 @@ class RKM(RBM):
             m_dv_corr / (torch.sqrt(v_dv_corr) + self.epsilon))
         self.h_bias = self.h_bias + self.lr * (
             m_dh_corr / (torch.sqrt(v_dh_corr) + self.epsilon))
+
+        # Apply masks if provided (for fine-tuning with weight suppression)
+        if self.W_mask is not None:
+            self.W.data[self.W_mask] = 0.0
+        if self.v_bias_mask is not None:
+            self.v_bias.data[self.v_bias_mask] = 0.0
+        if self.h_bias_mask is not None:
+            self.h_bias.data[self.h_bias_mask] = 0.0
 
     def reconstruct(self, data, k):
         """Reconstruct the visible units from the data.
