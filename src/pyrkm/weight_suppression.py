@@ -146,9 +146,27 @@ class WeightSuppressionAnalyzer:
                     if verbose:
                         print('❌ No active nodes remaining')
                     break
-                least_strength, least_used_idx = torch.min(
+
+                # FIX: Get the actual node index from the masked tensor
+                active_indices = torch.where(active_nodes)[0]
+                least_strength, masked_idx = torch.min(
                     weight_strength[active_nodes], dim=0)
+                least_used_idx = active_indices[masked_idx]
                 list_of_removed_nodes.add(least_used_idx.item())
+
+                # VERIFICATION: Check that exactly 'iteration+1' nodes are masked
+                currently_masked = (torch.sum(torch.abs(current_model.W),
+                                              dim=1) == 0).sum().item()
+                if currently_masked != iteration:
+                    if verbose:
+                        print(
+                            f"⚠️ Warning: Expected {iteration} masked nodes, found {currently_masked}"
+                        )
+
+                if verbose:
+                    print(
+                        f"Suppressing node {least_used_idx.item()} (strength: {least_strength:.4f})"
+                    )
 
                 if verbose:
                     print(
@@ -162,6 +180,19 @@ class WeightSuppressionAnalyzer:
                 current_model.h_bias[least_used_idx] = 0.0  # Hidden bias
                 # Update transpose matrix immediately
                 current_model.W_t = current_model.W.t()
+
+                # VERIFICATION: Confirm exactly iteration+1 nodes are now masked
+                masked_nodes = (torch.sum(torch.abs(current_model.W),
+                                          dim=1) == 0).sum().item()
+                expected_masked = iteration + 1
+                if masked_nodes != expected_masked:
+                    if verbose:
+                        print(
+                            f"❌ Error: Expected {expected_masked} masked nodes after suppression,"
+                            f" found {masked_nodes}")
+                elif verbose:
+                    print(
+                        f"  ✅ Verified: {masked_nodes} nodes correctly masked")
 
             # Create suppression mask for fine-tuning
             suppression_mask = (current_model.W == 0)
