@@ -1,9 +1,14 @@
+"""
+CNN classifier and dataset classes for image classification.
+"""
+
 from __future__ import annotations
 
 import os
-from typing import Tuple
+from typing import Any, Callable
 
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -23,15 +28,15 @@ class CustomDataset(Dataset):
         A function/transform to apply to the data.
     """
 
-    def __init__(self, data, targets, transform=None):
+    def __init__(self, data: Any, targets: Any, transform: Callable[[Any], Any] | None = None) -> None:
         self.data = data
         self.targets = targets
         self.transform = transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> tuple[Any, Any]:
         img = self.data[idx]
         label = self.targets[idx]
 
@@ -50,15 +55,15 @@ class SimpleClassifier(nn.Module):
         Defines the forward pass of the model.
     """
 
-    def __init__(self):
-        super(SimpleClassifier, self).__init__()
+    def __init__(self) -> None:
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(64 * 7 * 7, 128)
         self.fc2 = nn.Linear(128, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(torch.relu(self.conv1(x)))
         x = self.pool(torch.relu(self.conv2(x)))
         x = x.view(-1, 64 * 7 * 7)
@@ -67,13 +72,14 @@ class SimpleClassifier(nn.Module):
         return x
 
 
-def train_classifier(test_set: Tuple,
-                     train_set: Tuple,
-                     device: torch.device = torch.device(
-                         'cuda' if torch.cuda.is_available() else 'cpu'),
-                     batch_size: int = 64,
-                     learning_rate: float = 0.001,
-                     num_epochs: int = 5) -> Tuple[nn.Module, float]:
+def train_classifier(
+    test_set: tuple,
+    train_set: tuple,
+    device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+    batch_size: int = 64,
+    learning_rate: float = 0.001,
+    num_epochs: int = 5,
+) -> tuple[nn.Module, float]:
     """Train a simple classifier on the provided dataset.
 
     Parameters
@@ -102,12 +108,8 @@ def train_classifier(test_set: Tuple,
     test_dataset = CustomDataset(test_set[0], test_set[1])
 
     # Create data loaders
-    train_loader = DataLoader(dataset=train_dataset,
-                              batch_size=batch_size,
-                              shuffle=True)
-    test_loader = DataLoader(dataset=test_dataset,
-                             batch_size=batch_size,
-                             shuffle=False)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
     # Initialize the model, loss function, and optimizer
     model = SimpleClassifier().to(device).to(train_set[0][0].dtype)
@@ -115,18 +117,18 @@ def train_classifier(test_set: Tuple,
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Create directory for saving model states
-    os.makedirs('classifier_states', exist_ok=True)
+    os.makedirs("classifier_states", exist_ok=True)
 
     # Load the latest model state if it exists
     start_epoch = 0
     for epoch in range(num_epochs, 0, -1):
-        model_path = f'classifier_states/model_epoch_{epoch}.pth'
+        model_path = f"classifier_states/model_epoch_{epoch}.pth"
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            model.load_state_dict(checkpoint["model_state_dict"])
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
             start_epoch = epoch
-            print(f'Resuming training from epoch {start_epoch}')
+            print(f"Resuming training from epoch {start_epoch}")
             break
 
     # Training loop
@@ -138,8 +140,7 @@ def train_classifier(test_set: Tuple,
             images = images.reshape(-1, 1, 28, 28)
 
             # one-hot encode the labels
-            labels = nn.functional.one_hot(labels, num_classes=10).to(
-                torch.float32).squeeze()
+            labels = nn.functional.one_hot(labels, num_classes=10).to(torch.float32).squeeze()
 
             # Forward pass
             outputs = model(images)
@@ -152,16 +153,16 @@ def train_classifier(test_set: Tuple,
 
             running_loss += loss.item()
 
-        print(
-            f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}'
-        )
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(train_loader):.4f}")
 
         # Save the model state
         torch.save(
             {
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-            }, f'classifier_states/model_epoch_{epoch+1}.pth')
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+            },
+            f"classifier_states/model_epoch_{epoch + 1}.pth",
+        )
 
     # Evaluation
     model.eval()
@@ -177,19 +178,21 @@ def train_classifier(test_set: Tuple,
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print(f'Test Accuracy: {100 * correct / total:.2f}%')
+    print(f"Test Accuracy: {100 * correct / total:.2f}%")
 
     return model, 100 * correct / total
 
 
-def show_classification(file_name,
-                        img,
-                        cmap='gray',
-                        vmin=None,
-                        vmax=None,
-                        save=False,
-                        savename='',
-                        labels=None):
+def show_classification(
+    file_name: str,
+    img: np.ndarray,
+    cmap: str = "gray",
+    vmin: float | None = None,
+    vmax: float | None = None,
+    save: bool = False,
+    savename: str = "",
+    labels: list | None = None,
+) -> None:
     """Display an image or a grid of images with optional labels and save if specified.
 
     Parameters
@@ -222,11 +225,10 @@ def show_classification(file_name,
 
         # Ensure labels length matches the grid size
         if grid_size * grid_size != num_images:
-            raise ValueError('The length of labels must be a perfect square.')
+            raise ValueError("The length of labels must be a perfect square.")
 
         # Calculate sub-image dimensions
-        img_height, img_width = img.shape[0] // grid_size, img.shape[
-            1] // grid_size
+        img_height, img_width = img.shape[0] // grid_size, img.shape[1] // grid_size
 
         # Place labels
         for idx, label in enumerate(labels):
@@ -235,11 +237,12 @@ def show_classification(file_name,
                 col * img_width + img_width,  # x-coordinate
                 row * img_height,  # y-coordinate
                 label,  # Label text
-                color='red',
+                color="red",
                 fontsize=10,
-                ha='center',
-                va='center',
-                bbox=dict(facecolor='white', alpha=0.6, edgecolor='none'))
+                ha="center",
+                va="center",
+                bbox={"facecolor": "white", "alpha": 0.6, "edgecolor": "none"},
+            )
 
     if save:
         plt.savefig(savename)

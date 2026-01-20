@@ -1,7 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 ---
-exclude: ^examples/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -16,26 +15,20 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: double-quote-string-fixer
-  - repo: https://github.com/google/yapf
-    rev: v0.40.1
+  - repo: https://github.com/myint/docformatter
+    rev: 06907d0
     hooks:
-      - id: yapf
-        additional_dependencies:
-          - toml
-          - tomli
+      - id: docformatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.11.0
     hooks:
       - id: ruff
         args: [--fix]
+        types_or: [python, pyi, jupyter]
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.15.0
     hooks:
       - id: mypy
-        additional_dependencies: [matplotlib, MDAnalysis, numpy, pymatgen, rich, scikit-image, scipy]
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.0
-    hooks:
-      - id: nbqa-yapf
-        additional_dependencies: [toml, yapf]
-        types_or: [jupyter]
+        additional_dependencies: [matplotlib, MDAnalysis, kinisi, numpy, pymatgen, rich, scikit-image, scipy]

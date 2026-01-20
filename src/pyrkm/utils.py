@@ -1,10 +1,15 @@
+"""
+Utility functions for data processing and metrics.
+"""
+
 from __future__ import annotations
 
 import glob
 import gzip
 import io
 import os
-import pickle
+import pickle  # nosec B403
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +20,9 @@ from scipy.optimize import fsolve
 from torchvision.models import inception_v3
 
 
-def load_model(name, delete_previous=False, model_state_path='model_states/'):
+def load_model(
+    name: str, delete_previous: bool = False, model_state_path: str = "model_states/"
+) -> tuple[bool, Any]:
     """Load a model from the specified path.
 
     Parameters
@@ -35,34 +42,32 @@ def load_model(name, delete_previous=False, model_state_path='model_states/'):
         The loaded model if successful, otherwise an empty list.
     """
     # Check if you have model load points
-    filename_list = glob.glob(model_state_path + '{}_t*.pkl'.format(name))
+    filename_list = glob.glob(model_state_path + f"{name}_t*.pkl")
     if len(filename_list) > 0:
-        all_loadpoints = sorted(
-            [int(x.split('_t')[-1].split('.pkl')[0]) for x in filename_list])
+        all_loadpoints = sorted([int(x.split("_t")[-1].split(".pkl")[0]) for x in filename_list])
         last_epoch = all_loadpoints[-1]
-        print('** Model {} trained up to epoch {}, so I load it'.format(
-            name, last_epoch),
-              flush=True)
-        with open(model_state_path + '{}_t{}.pkl'.format(name, last_epoch),
-                  'rb') as file:
-            model = pickle.load(file)
+        print("** Model {} trained up to epoch {}, so I load it".format(name, last_epoch), flush=True)
+        with open(model_state_path + f"{name}_t{last_epoch}.pkl", "rb") as file:
+            model = pickle.load(file)  # nosec B301
         if delete_previous:
             # Remove all the previous loadpoints
             for x in all_loadpoints[:-1]:
-                os.remove(model_state_path + '{}_t{}.pkl'.format(name, x))
+                os.remove(model_state_path + f"{name}_t{x}.pkl")
         return True, model
     else:
-        print('** No load points for {}'.format(name), flush=True)
+        print(f"** No load points for {name}", flush=True)
         return False, []
 
 
-def show_and_save(file_name,
-                  img,
-                  cmap='gray',
-                  vmin=None,
-                  vmax=None,
-                  save=False,
-                  savename=''):
+def show_and_save(
+    file_name: str,
+    img: np.ndarray,
+    cmap: str = "gray",
+    vmin: float | None = None,
+    vmax: float | None = None,
+    save: bool = False,
+    savename: str = "",
+) -> None:
     """Display and optionally save an image.
 
     Parameters
@@ -91,7 +96,7 @@ def show_and_save(file_name,
         plt.show()
 
 
-def make_grid(array, nrow=8, padding=2):
+def make_grid(array: np.ndarray, nrow: int = 8, padding: int = 2) -> np.ndarray:
     """Create a grid of images.
 
     Parameters
@@ -113,22 +118,21 @@ def make_grid(array, nrow=8, padding=2):
     W = array.shape[2]
     grid_h = int(np.ceil(N / float(nrow)))
     grid_w = nrow
-    grid = np.zeros(
-        [grid_h * (H + padding) + padding, grid_w * (W + padding) + padding])
+    grid = np.zeros([grid_h * (H + padding) + padding, grid_w * (W + padding) + padding])
     k = 0
     for y in range(grid_h):
         for x in range(grid_w):
             if k < N:
-                grid[y * (H + padding):y * (H + padding) + H,
-                     x * (W + padding):x * (W + padding) + W] = array[k]
+                grid[y * (H + padding) : y * (H + padding) + H, x * (W + padding) : x * (W + padding) + W] = (
+                    array[k]
+                )
                 k = k + 1
     return grid
 
 
-def getbasebias(data):
-    """Returns the maximum likelihood estimate of the visible bias,
-    given the data. If no data is given the RBMs bias value is return,
-    but is highly recommended to pass the data.
+def getbasebias(data: torch.Tensor) -> torch.Tensor:
+    """Returns the maximum likelihood estimate of the visible bias, given the data. If no data is given the
+    RBMs bias value is return, but is highly recommended to pass the data.
 
     Parameters
     ----------
@@ -141,10 +145,12 @@ def getbasebias(data):
         The base bias.
     """
     save_mean = torch.clip(data.mean(0), 0.00001, 0.99999)
-    return (torch.log(save_mean) - torch.log(1.0 - save_mean))
+    return torch.log(save_mean) - torch.log(1.0 - save_mean)
 
 
-def Covariance_error(centered_data_original, centered_data_model, Nv):
+def Covariance_error(
+    centered_data_original: torch.Tensor, centered_data_model: torch.Tensor, Nv: int
+) -> torch.Tensor:
     """Compute the covariance error between original and model data.
 
     Parameters
@@ -161,15 +167,16 @@ def Covariance_error(centered_data_original, centered_data_model, Nv):
     torch.Tensor
         The covariance error.
     """
-    covariance_matrix_original = torch.matmul(centered_data_original.T,
-                                              centered_data_original).mean(0)
-    covariance_matrix_model = torch.matmul(centered_data_model.T,
-                                           centered_data_model).mean(0)
-    return torch.pow(covariance_matrix_original - covariance_matrix_model,
-                     2).triu().sum() * 2 / (Nv * (Nv - 1))
+    covariance_matrix_original = torch.matmul(centered_data_original.T, centered_data_original).mean(0)
+    covariance_matrix_model = torch.matmul(centered_data_model.T, centered_data_model).mean(0)
+    return (
+        torch.pow(covariance_matrix_original - covariance_matrix_model, 2).triu().sum() * 2 / (Nv * (Nv - 1))
+    )
 
 
-def Third_moment_error(centered_data_original, centered_data_model, Nv):
+def Third_moment_error(
+    centered_data_original: torch.Tensor, centered_data_model: torch.Tensor, Nv: int
+) -> torch.Tensor:
     """Compute the third moment error between original and model data.
 
     Parameters
@@ -186,12 +193,14 @@ def Third_moment_error(centered_data_original, centered_data_model, Nv):
     torch.Tensor
         The third moment error.
     """
-    C_ijk_original = torch.einsum(
-        'ni,nj,nk->ijk', centered_data_original, centered_data_original,
-        centered_data_original) / centered_data_model.shape[0]
-    C_ijk_model = torch.einsum(
-        'ni,nj,nk->ijk', centered_data_model, centered_data_model,
-        centered_data_model) / centered_data_model.shape[0]
+    C_ijk_original = (
+        torch.einsum("ni,nj,nk->ijk", centered_data_original, centered_data_original, centered_data_original)
+        / centered_data_model.shape[0]
+    )
+    C_ijk_model = (
+        torch.einsum("ni,nj,nk->ijk", centered_data_model, centered_data_model, centered_data_model)
+        / centered_data_model.shape[0]
+    )
     C_ijk = torch.pow(C_ijk_model - C_ijk_original, 2)
     sum_ijk = 0.0
     upper_triangular = torch.triu(C_ijk, diagonal=1)
@@ -199,7 +208,7 @@ def Third_moment_error(centered_data_original, centered_data_model, Nv):
     return sum_ijk * 6 / (Nv * (Nv - 1) * (Nv - 2))
 
 
-def PowerSpectrum_MSE(v, v_model):
+def PowerSpectrum_MSE(v: torch.Tensor, v_model: torch.Tensor) -> torch.Tensor:
     """Compute the mean squared error of the power spectrum between original and model data.
 
     Parameters
@@ -218,14 +227,13 @@ def PowerSpectrum_MSE(v, v_model):
     signal_fft_original = fft.fft2(v)
     signal_fft_model = fft.fft2(v_model)
     # Compute the power spectrum
-    power_spectrum_original = torch.mean(torch.abs(signal_fft_original)**2, 0)
-    power_spectrum_model = torch.mean(torch.abs(signal_fft_model)**2, 0)
+    power_spectrum_original = torch.mean(torch.abs(signal_fft_original) ** 2, 0)
+    power_spectrum_model = torch.mean(torch.abs(signal_fft_model) ** 2, 0)
     # MSE of the power spectrum
-    return torch.mean((torch.log(power_spectrum_original) -
-                       torch.log(power_spectrum_model))**2)
+    return torch.mean((torch.log(power_spectrum_original) - torch.log(power_spectrum_model)) ** 2)
 
 
-def ComputeAATS(v, v_model):
+def ComputeAATS(v: torch.Tensor, v_model: torch.Tensor) -> np.ndarray:
     """Compute the Average Absolute Truth Score (AATS) between original and model data.
 
     Parameters
@@ -244,13 +252,13 @@ def ComputeAATS(v, v_model):
     """
     CONCAT = torch.cat((v, v_model), 1)
     dAB = torch.cdist(CONCAT.t(), CONCAT.t())
-    torch.diagonal(dAB).fill_(float('inf'))
+    torch.diagonal(dAB).fill_(float("inf"))
     dAB = dAB.cpu().numpy()
 
     # the next line is use to tranform the matrix into
     #  d_TT d_TF   INTO d_TF- d_TT-  where the minus indicate a reverse order of the columns
     #  d_FT d_FF        d_FT  d_FF
-    dAB[:int(dAB.shape[0] / 2), :] = dAB[:int(dAB.shape[0] / 2), ::-1]
+    dAB[: int(dAB.shape[0] / 2), :] = dAB[: int(dAB.shape[0] / 2), ::-1]
     closest = dAB.argmin(axis=1)
     n = int(closest.shape[0] / 2)
 
@@ -261,7 +269,7 @@ def ComputeAATS(v, v_model):
     return AAtruth, AAsyn
 
 
-def Compute_FID(synthetic_images, real_images):
+def Compute_FID(synthetic_images: torch.Tensor, real_images: torch.Tensor) -> float:
     """Compute the Frechet Inception Distance (FID) between synthetic and real images.
 
     Parameters
@@ -277,18 +285,15 @@ def Compute_FID(synthetic_images, real_images):
         The FID score.
     """
     device = synthetic_images.device
-    inception_model = inception_v3(pretrained=True,
-                                   transform_input=False).to(device)
+    # Load inception model and ensure it's in float32
+    inception_model = inception_v3(pretrained=True, transform_input=False)
+    inception_model = inception_model.to(device).to(torch.float32)
     inception_model.eval()
 
     def preprocess_images(images):
-        images = images.reshape(-1, 28,
-                                28).unsqueeze(1).repeat(1, 3, 1,
-                                                        1).to(torch.float64)
-        images = torch.nn.functional.interpolate(images,
-                                                 size=299,
-                                                 mode='bilinear',
-                                                 align_corners=False)
+        # Convert to float32 for inception model compatibility
+        images = images.to(torch.float32).reshape(-1, 28, 28).unsqueeze(1).repeat(1, 3, 1, 1)
+        images = torch.nn.functional.interpolate(images, size=299, mode="bilinear", align_corners=False)
         return images
 
     def get_activations(images):
@@ -321,9 +326,8 @@ def Compute_FID(synthetic_images, real_images):
     return fid
 
 
-def Compute_S(v, v_gen):
-    """Compute the relative entropy between
-    original and generated data.
+def Compute_S(v: torch.Tensor, v_gen: torch.Tensor) -> float:
+    """Compute the relative entropy between original and generated data.
 
     Parameters
     ----------
@@ -346,7 +350,7 @@ def Compute_S(v, v_gen):
     # define a mixed set for crossentropy:
     # this set will contain the first half of the original set and the second half of the generated set
     v_cross = v.copy()
-    v_cross[:int(0.5 * v_cross.shape[0])] = v_gen[:int(0.5 * v_cross.shape[0])]
+    v_cross[: int(0.5 * v_cross.shape[0])] = v_gen[: int(0.5 * v_cross.shape[0])]
 
     # Convert the array to bytes
     bytes_io = io.BytesIO()
@@ -362,10 +366,8 @@ def Compute_S(v, v_gen):
     # Calculate the entropy
     byte_count_src = len(compressed_src)
     byte_count_cross = len(compressed_cross)
-    value_counts_src = np.bincount(
-        np.frombuffer(compressed_src, dtype=np.uint8))
-    value_counts_cross = np.bincount(
-        np.frombuffer(compressed_cross, dtype=np.uint8))
+    value_counts_src = np.bincount(np.frombuffer(compressed_src, dtype=np.uint8))
+    value_counts_cross = np.bincount(np.frombuffer(compressed_cross, dtype=np.uint8))
     probabilities_src = value_counts_src / byte_count_src
     probabilities_cross = value_counts_cross / byte_count_cross
     probabilities_src = probabilities_src[probabilities_src > 0]
@@ -377,7 +379,7 @@ def Compute_S(v, v_gen):
     return entropy_cross / entropy_src - 1
 
 
-def generate_S_matrix(shape, target):
+def generate_S_matrix(shape: tuple[int, int], target: float) -> np.ndarray:
     """Generate a random matrix with values between 0 and 1, adjusted to achieve the desired average.
 
     Parameters
@@ -398,7 +400,9 @@ def generate_S_matrix(shape, target):
     return adjusted_matrix
 
 
-def generate_synthetic_data(target_entropy, data_size, structured=True):
+def generate_synthetic_data(
+    target_entropy: float, data_size: tuple[int, int, int], structured: bool = True
+) -> np.ndarray:
     """Generate synthetic data with the specified target entropy.
 
     Parameters
@@ -417,32 +421,28 @@ def generate_synthetic_data(target_entropy, data_size, structured=True):
     """
 
     def S_lambda(x):
-        return -x * np.nan_to_num(np.log2(x)) - (1 - x) * np.nan_to_num(
-            np.log2(1 - x))
+        return -x * np.nan_to_num(np.log2(x)) - (1 - x) * np.nan_to_num(np.log2(1 - x))
 
-    pixel_target = generate_S_matrix((data_size[1], data_size[2]),
-                                     target_entropy)
+    pixel_target = generate_S_matrix((data_size[1], data_size[2]), target_entropy)
     if structured:
         flat_indices = np.argsort(pixel_target.flatten())
-        pixel_target = pixel_target.flatten()[flat_indices].reshape(
-            pixel_target.shape)
+        pixel_target = pixel_target.flatten()[flat_indices].reshape(pixel_target.shape)
 
     initial_guess = np.zeros((data_size[1], data_size[2]))
-    P = fsolve(lambda x: S_lambda(x) - pixel_target.flatten(),
-               initial_guess.flatten())
+    P = fsolve(lambda x: S_lambda(x) - pixel_target.flatten(), initial_guess.flatten())
 
-    generated_data = ((np.random.rand(data_size[0],
-                                      data_size[1] * data_size[2])
-                       < P).astype(int)).reshape(data_size)
+    generated_data = ((np.random.rand(data_size[0], data_size[1] * data_size[2]) < P).astype(int)).reshape(
+        data_size
+    )
     S_image, S_pixel = my_entropy(generated_data)
-    print(f'\nTarget = {target_entropy}')
-    print(f'generated entropy (image) = {S_image.mean()}')
-    print(f'generated entropy (pixels) = {S_pixel.mean()}')
+    print(f"\nTarget = {target_entropy}")
+    print(f"generated entropy (image) = {S_image.mean()}")
+    print(f"generated entropy (pixels) = {S_pixel.mean()}")
 
     return generated_data
 
 
-def my_entropy(data):
+def my_entropy(data: np.ndarray) -> float:
     """Compute the entropy per image and per pixel.
 
     Parameters
@@ -458,15 +458,13 @@ def my_entropy(data):
         The entropy per pixel.
     """
     X = data.mean(1).mean(1)
-    S_image = -X * np.nan_to_num(np.log2(X)) - (1 - X) * np.nan_to_num(
-        np.log2(1 - X))
+    S_image = -X * np.nan_to_num(np.log2(X)) - (1 - X) * np.nan_to_num(np.log2(1 - X))
     Y = data.mean(0)
-    S_pixel = -Y * np.nan_to_num(np.log2(Y)) - (1 - Y) * np.nan_to_num(
-        np.log2(1 - Y))
+    S_pixel = -Y * np.nan_to_num(np.log2(Y)) - (1 - Y) * np.nan_to_num(np.log2(1 - Y))
     return S_image, S_pixel
 
 
-def binarize_image(image, threshold=128):
+def binarize_image(image: np.ndarray, threshold: int = 128) -> np.ndarray:
     """Binarize the image using a threshold.
 
     Parameters
@@ -485,7 +483,7 @@ def binarize_image(image, threshold=128):
     return binary_image
 
 
-def ensure_dir(dirname):
+def ensure_dir(dirname: str) -> None:
     """Create a directory if it does not exist.
 
     Parameters
@@ -497,7 +495,7 @@ def ensure_dir(dirname):
         os.makedirs(dirname)
 
 
-def unpickle(file):
+def unpickle(file: str) -> Any:
     """Unpickle a file.
 
     Parameters
@@ -505,6 +503,6 @@ def unpickle(file):
     file : str
         The file to unpickle.
     """
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
+    with open(file, "rb") as fo:
+        dict = pickle.load(fo, encoding="bytes")  # nosec B301
     return dict

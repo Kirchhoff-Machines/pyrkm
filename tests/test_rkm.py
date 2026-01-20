@@ -1,93 +1,205 @@
+"""
+Tests for the RKM module.
+"""
+
 from __future__ import annotations
 
 import numpy as np
 import pytest
 import torch
 
-from pyrkm.rbm import RBM
+from pyrkm.rkm import RKM
 
 
-@pytest.fixture(scope='module')
-def rbm():
-    return RBM(model_name='test_rbm',
-               n_visible=6,
-               n_hidden=3,
-               k=1,
-               lr=0.01,
-               max_epochs=10,
-               energy_type='hopfield',
-               optimizer='SGD',
-               regularization=False,
-               l1_factor=0,
-               l2_factor=1e-3,
-               g_v=0.5,
-               g_h=0.5,
-               batch_size=1,
-               train_algo='vRDM',
-               centering=False,
-               average_data=None,
-               model_beta=1,
-               mytype=torch.float32,
-               min_W=-10,
-               max_W=10)
+@pytest.fixture(scope="module")
+def rkm() -> RKM:
+    """
+    Create RKM instance for testing.
+    """
+    return RKM(
+        model_name="test_rkm",
+        n_visible=10,
+        n_hidden=5,
+        k=1,
+        lr=0.01,
+        max_epochs=100,
+        energy_type="RKM",
+        optimizer="SGD",
+        batch_size=2,
+        train_algo="vRDM",
+        mytype=torch.float32,
+    )
 
 
-def test_initialization(rbm):
-    assert rbm.W.shape == (rbm.n_hidden, rbm.n_visible)
-    assert rbm.v_bias.shape == (rbm.n_visible, )
-    assert rbm.h_bias.shape == (rbm.n_hidden, )
-    assert rbm.device.type in ['cpu', 'cuda']
+def test_initialization(rkm: RKM) -> None:
+    """
+    Test RKM model creates without errors.
+    """
+    assert rkm is not None
+    assert rkm.n_visible == 10
+    assert rkm.n_hidden == 5
+    assert rkm.W.shape == (rkm.n_hidden, rkm.n_visible)
+    assert rkm.v_bias.shape == (rkm.n_visible,)
+    assert rkm.h_bias.shape == (rkm.n_hidden,)
+    assert rkm.device.type in ["cpu", "cuda"]
 
 
-def test_forward_pass(rbm):
-    v = torch.randint(0, 2,
-                      (rbm.batch_size, rbm.n_visible)).float().to(rbm.device)
-    v_model = rbm.forward(v, rbm.k)
+def test_rkm_energy_type(rkm: RKM) -> None:
+    """
+    Test RKM has correct energy type.
+    """
+    assert rkm.energy_type == "RKM"
+
+
+def test_forward_pass(rkm: RKM) -> None:
+    """
+    Test RKM forward pass produces correct output shape.
+    """
+    v = torch.randint(0, 2, (rkm.batch_size, rkm.n_visible)).float().to(rkm.device)
+    v_model = rkm.forward(v, rkm.k)
     assert v_model.shape == v.shape
 
 
-def test_reconstruction(rbm):
-    data = np.random.randint(0, 2, (rbm.batch_size, rbm.n_visible))
-    original, reconstructed = rbm.reconstruct(data, rbm.k)
+def test_reconstruction(rkm: RKM) -> None:
+    """
+    Test RKM reconstruction maintains input shape.
+    """
+    data = np.random.randint(0, 2, (rkm.batch_size, rkm.n_visible))
+    original, reconstructed = rkm.reconstruct(data, rkm.k)
     assert original.shape == reconstructed.shape
+    assert original.shape == (rkm.batch_size, rkm.n_visible)
 
 
-def test_train_step(rbm):
-    train_data = [
-        torch.randint(0, 2,
-                      (rbm.batch_size, rbm.n_visible)).float().to(rbm.device)
-    ]
-    rbm.train(train_data,
-              print_error=False,
-              print_test_error=False,
-              print_every=1)
-    assert rbm.epoch > 0
+def test_train_step() -> None:
+    """
+    Test RKM can train for one batch.
+    """
+    rkm_train = RKM(
+        model_name="test_rkm_train",
+        n_visible=10,
+        n_hidden=5,
+        k=1,
+        lr=0.01,
+        max_epochs=1,
+        energy_type="RKM",
+        batch_size=2,
+    )
+
+    train_data = [torch.randint(0, 2, (2, 10), device=rkm_train.device).float()]
+    initial_epoch = rkm_train.epoch
+    rkm_train.train(train_data, print_error=False)
+    assert rkm_train.epoch > initial_epoch
 
 
-def test_clip_weights(rbm):
-    rbm.W = torch.randn((rbm.n_hidden, rbm.n_visible)) * 20
-    rbm.clip_weights()
-    assert torch.all(rbm.W <= rbm.max_W)
-    assert torch.all(rbm.W >= rbm.min_W)
+def test_clip_weights(rkm: RKM) -> None:
+    """
+    Test weight clipping enforces bounds.
+    """
+    """
+    Test weight clipping.
+    """
+    rkm.W = torch.randn((rkm.n_hidden, rkm.n_visible), device=rkm.device) * 50
+    rkm.clip_weights()
+    assert torch.all(rkm.W <= rkm.max_W)
+    assert torch.all(rkm.W >= rkm.min_W)
 
 
-def test_clip_bias(rbm):
-    rbm.v_bias = torch.randn((rbm.n_visible, )) * 20
-    rbm.h_bias = torch.randn((rbm.n_hidden, )) * 20
-    rbm.clip_bias()
-    assert torch.all(rbm.v_bias <= rbm.max_W)
-    assert torch.all(rbm.v_bias >= rbm.min_W)
-    assert torch.all(rbm.h_bias <= rbm.max_W)
-    assert torch.all(rbm.h_bias >= rbm.min_W)
+def test_clip_bias(rkm: RKM) -> None:
+    """
+    Test bias clipping enforces bounds.
+    """
+    """
+    Test bias clipping.
+    """
+    rkm.v_bias = torch.randn((rkm.n_visible,), device=rkm.device) * 50
+    rkm.h_bias = torch.randn((rkm.n_hidden,), device=rkm.device) * 50
+    rkm.clip_bias()
+    assert torch.all(rkm.v_bias <= rkm.max_W)
+    assert torch.all(rkm.v_bias >= rkm.min_W)
+    assert torch.all(rkm.h_bias <= rkm.max_W)
+    assert torch.all(rkm.h_bias >= rkm.min_W)
 
 
-def test_prob_h_given_v(rbm):
-    v = torch.randint(0, 2, (rbm.batch_size, rbm.n_visible)).float()
-    p_h = rbm._prob_h_given_v(v)
-    assert p_h.shape == (rbm.batch_size, rbm.n_hidden)
+def test_v_to_h(rkm: RKM) -> None:
+    """
+    Test visible to hidden conversion.
+    """
+    """
+    Test visible to hidden transformation.
+    """
+    v = torch.randint(0, 2, (rkm.batch_size, rkm.n_visible), device=rkm.device).float()
+    p_h, h = rkm.v_to_h(v)
+    assert p_h.shape == (rkm.batch_size, rkm.n_hidden)
+    assert h.shape == (rkm.batch_size, rkm.n_hidden)
 
 
-def test_prob_v_given_h(rbm):
-    h = torch.randint(0, 2, (rbm.batch_size, rbm.n_hidden)).float()
-    p_v = rbm._prob_v_given_h(h)
-    assert p_v.shape == (rbm.batch_size, rbm.n_visible)
+def test_h_to_v(rkm: RKM) -> None:
+    """
+    Test hidden to visible conversion.
+    """
+    """
+    Test hidden to visible transformation.
+    """
+    h = torch.randint(0, 2, (rkm.batch_size, rkm.n_hidden), device=rkm.device).float()
+    p_v, v = rkm.h_to_v(h)
+    assert p_v.shape == (rkm.batch_size, rkm.n_visible)
+    assert v.shape == (rkm.batch_size, rkm.n_visible)
+
+
+def test_free_energy(rkm: RKM) -> None:
+    """
+    Test RKM free energy calculation.
+    """
+    """
+    Test RKM free energy calculation.
+    """
+    v = torch.randint(0, 2, (rkm.batch_size, rkm.n_visible), device=rkm.device).float()
+    fe = rkm.free_energy(v, beta=1.0)
+    assert fe.shape[0] == rkm.batch_size
+    assert not torch.any(torch.isnan(fe))
+
+
+def test_rkm_with_adam_optimizer() -> None:
+    """
+    Test RKM initialization with Adam optimizer.
+    """
+    """
+    Test RKM initialization with Adam optimizer.
+    """
+    rkm_adam = RKM(model_name="test_rkm_adam", n_visible=10, n_hidden=5, optimizer="Adam", batch_size=2)
+    assert hasattr(rkm_adam, "m_dW")
+    assert hasattr(rkm_adam, "v_dW")
+
+
+def test_rkm_with_cd() -> None:
+    """
+    Test RKM with Contrastive Divergence training.
+    """
+    """
+    Test RKM with Contrastive Divergence.
+    """
+    rkm_cd = RKM(model_name="test_rkm_cd", n_visible=10, n_hidden=5, train_algo="CD", batch_size=2)
+    assert rkm_cd.train_algo == "CD"
+
+
+def test_rkm_with_pcd() -> None:
+    """
+    Test RKM with Persistent Contrastive Divergence training.
+    """
+    """
+    Test RKM with Persistent CD.
+    """
+    rkm_pcd = RKM(model_name="test_rkm_pcd", n_visible=10, n_hidden=5, train_algo="PCD", batch_size=2)
+    assert rkm_pcd.train_algo == "PCD"
+    assert hasattr(rkm_pcd, "persistent_chains")
+
+
+def test_rkm_with_hrdm() -> None:
+    """
+    Test RKM with hidden-random training algorithm.
+    """
+    """
+    Test RKM with hidden random initialization.
+    """
+    rkm_hrdm = RKM(model_name="test_rkm_hrdm", n_visible=10, n_hidden=5, train_algo="hRDM", batch_size=2)
+    assert rkm_hrdm.train_algo == "hRDM"

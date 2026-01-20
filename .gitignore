@@ -21,15 +21,18 @@ pyrkm.egg-info/
 .tests
 
 # Temp files from the notebook run
-model_measures/
+model_measure/
 model_states/
 classifier_states/
-*/model_measures/
+*/model_measure/
 */model_states/
 */classifier_states/
-*/*/model_measures/
+*/*/model_measure/
 */*/model_states/
 */*/classifier_states/
-*/*/*/model_measures/
+*/*/*/model_measure/
 */*/*/model_states/
 */*/*/classifier_states/
+
+venv/
+.venv/
