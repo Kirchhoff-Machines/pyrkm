@@ -233,7 +233,7 @@ def PowerSpectrum_MSE(v: torch.Tensor, v_model: torch.Tensor) -> torch.Tensor:
     return torch.mean((torch.log(power_spectrum_original) - torch.log(power_spectrum_model)) ** 2)
 
 
-def ComputeAATS(v: torch.Tensor, v_model: torch.Tensor) -> np.ndarray:
+def ComputeAATS(v: torch.Tensor, v_model: torch.Tensor) -> tuple[float, float]:
     """Compute the Average Absolute Truth Score (AATS) between original and model data.
 
     Parameters
@@ -442,7 +442,7 @@ def generate_synthetic_data(
     return generated_data
 
 
-def my_entropy(data: np.ndarray) -> float:
+def my_entropy(data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Compute the entropy per image and per pixel.
 
     Parameters

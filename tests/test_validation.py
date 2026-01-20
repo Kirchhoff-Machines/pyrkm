@@ -39,7 +39,7 @@ class TestValidatePositiveInt:
         Test that float raises ValueError.
         """
         with pytest.raises(ValueError, match="test_param must be a positive integer"):
-            validate_positive_int(5.5, "test_param")
+            validate_positive_int(5.5, "test_param")  # type: ignore
 
 
 class TestValidatePositiveFloat:

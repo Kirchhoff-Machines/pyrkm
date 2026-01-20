@@ -99,6 +99,9 @@ source = ["pyrkm"]
 testpaths = ["tests"]
 
 [tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
 # Enable Pyflakes `E` and `F` codes by default.
 select = [
     "F",  # Pyflakes
@@ -107,9 +110,7 @@ select = [
     "I",  # isort
 ]
 
-line-length = 110
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party=["pyrkm"]
 known-third-party = ["torch"]
 required-imports = ["from __future__ import annotations"]

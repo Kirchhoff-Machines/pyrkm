@@ -69,6 +69,9 @@ class RKM(RBM):
                 .to(self.mytype)
             )
         if self.centering:
+            if self.average_data is None:
+                print("Error: you need to provide the average of the data to center the gradient")
+                sys.exit()
             if self.average_data.shape[0] != self.n_visible:
                 print("Error: you need to provide the average of the data to center the gradient")
                 sys.exit()
@@ -625,13 +628,13 @@ class RKM(RBM):
             dh = dh - torch.matmul(self.ov, dW.t())
         # Add regularization term
         if self.regularization == "l2":
-            dW -= self.l2 * 2 * self.W
-            dv -= self.l2 * 2 * self.v_bias
-            dh -= self.l2 * 2 * self.h_bias
+            dW -= self.l2_factor * 2 * self.W
+            dv -= self.l2_factor * 2 * self.v_bias
+            dh -= self.l2_factor * 2 * self.h_bias
         elif self.regularization == "l1":
-            dW -= self.l1 * torch.sign(self.W)
-            dv -= self.l1 * torch.sign(self.v_bias)
-            dh -= self.l1 * torch.sign(self.h_bias)
+            dW -= self.l1_factor * torch.sign(self.W)
+            dv -= self.l1_factor * torch.sign(self.v_bias)
+            dh -= self.l1_factor * torch.sign(self.h_bias)
         # Update parameters in-place
         # # and clip
         # gnorm = torch.norm(dW) + torch.norm(dv) + torch.norm(dh)
@@ -678,13 +681,13 @@ class RKM(RBM):
             dh = dh - torch.matmul(self.ov, dW.t())
         # Add regularization term
         if self.regularization == "l2":
-            dW += self.l2 * 2 * self.W
-            dv += self.l2 * 2 * self.v_bias
-            dh += self.l2 * 2 * self.h_bias
+            dW += self.l2_factor * 2 * self.W
+            dv += self.l2_factor * 2 * self.v_bias
+            dh += self.l2_factor * 2 * self.h_bias
         elif self.regularization == "l1":
-            dW += self.l1 * torch.sign(self.W)
-            dv += self.l1 * torch.sign(self.v_bias)
-            dh += self.l1 * torch.sign(self.h_bias)
+            dW += self.l1_factor * torch.sign(self.W)
+            dv += self.l1_factor * torch.sign(self.v_bias)
+            dh += self.l1_factor * torch.sign(self.h_bias)
         # momentum beta1
         self.m_dW = self.beta1 * self.m_dW + (1 - self.beta1) * dW
         self.m_dv = self.beta1 * self.m_dv + (1 - self.beta1) * dv
@@ -983,7 +986,7 @@ class RKM(RBM):
         # Create a dummy image for the colorbar
         dummy_img = np.zeros((1, 1))  # Dummy image with all zeros
         # Add a colorbar using the dummy image as the mappable
-        cax = fig.add_axes([0.93, 0.15, 0.02, 0.7])  # Position of the colorbar
+        cax = fig.add_axes((0.93, 0.15, 0.02, 0.7))  # Position of the colorbar
         plt.colorbar(plt.imshow(dummy_img, cmap="magma", vmin=vmin, vmax=vmax), cax=cax)
         # Adjust the height of the colorbar axes to match the height of the figure
         cax.set_aspect("auto")

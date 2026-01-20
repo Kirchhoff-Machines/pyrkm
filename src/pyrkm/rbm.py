@@ -77,7 +77,7 @@ class RBM:
     max_epochs: int = 200000
     energy_type: str = "hopfield"
     optimizer: str = "SGD"
-    regularization: bool = False
+    regularization: str | bool = False
     l1_factor: float = 0
     l2_factor: float = 1e-3
     g_v: float = 0.5
@@ -162,6 +162,9 @@ class RBM:
         Initializes the centering parameters if centering is enabled.
         """
         if self.centering:
+            if self.average_data is None:
+                print("Error: you need to provide the average of the data to center the gradient")
+                sys.exit()
             if self.average_data.shape[0] != self.n_visible:
                 print("Error: you need to provide the average of the data to center the gradient")
                 sys.exit()
@@ -638,13 +641,13 @@ class RBM:
             dv = dv - torch.matmul(self.oh, dW)
             dh = dh - torch.matmul(self.ov, dW.t())
         if self.regularization == "l2":
-            dW -= self.l2 * 2 * self.W
-            dv -= self.l2 * 2 * self.v_bias
-            dh -= self.l2 * 2 * self.h_bias
+            dW -= self.l2_factor * 2 * self.W
+            dv -= self.l2_factor * 2 * self.v_bias
+            dh -= self.l2_factor * 2 * self.h_bias
         elif self.regularization == "l1":
-            dW -= self.l1 * torch.sign(self.W)
-            dv -= self.l1 * torch.sign(self.v_bias)
-            dh -= self.l1 * torch.sign(self.h_bias)
+            dW -= self.l1_factor * torch.sign(self.W)
+            dv -= self.l1_factor * torch.sign(self.v_bias)
+            dh -= self.l1_factor * torch.sign(self.h_bias)
         self.W.add_(self.lr * dW)
         self.v_bias.add_(self.lr * dv)
         self.h_bias.add_(self.lr * dh)
@@ -685,13 +688,13 @@ class RBM:
             dv = dv - torch.matmul(self.oh, dW)
             dh = dh - torch.matmul(self.ov, dW.t())
         if self.regularization == "l2":
-            dW += self.l2 * 2 * self.W
-            dv += self.l2 * 2 * self.v_bias
-            dh += self.l2 * 2 * self.h_bias
+            dW += self.l2_factor * 2 * self.W
+            dv += self.l2_factor * 2 * self.v_bias
+            dh += self.l2_factor * 2 * self.h_bias
         elif self.regularization == "l1":
-            dW += self.l1 * torch.sign(self.W)
-            dv += self.l1 * torch.sign(self.v_bias)
-            dh += self.l1 * torch.sign(self.h_bias)
+            dW += self.l1_factor * torch.sign(self.W)
+            dv += self.l1_factor * torch.sign(self.v_bias)
+            dh += self.l1_factor * torch.sign(self.h_bias)
         self.m_dW = self.beta1 * self.m_dW + (1 - self.beta1) * dW
         self.m_dv = self.beta1 * self.m_dv + (1 - self.beta1) * dv
         self.m_dh = self.beta1 * self.m_dh + (1 - self.beta1) * dh
@@ -974,7 +977,7 @@ class RBM:
         vmin = np.min(self.W.detach().cpu().numpy())
         vmax = np.max(self.W.detach().cpu().numpy())
         dummy_img = np.zeros((1, 1))
-        cax = fig.add_axes([0.93, 0.15, 0.02, 0.7])
+        cax = fig.add_axes((0.93, 0.15, 0.02, 0.7))
         plt.colorbar(plt.imshow(dummy_img, cmap="magma", vmin=vmin, vmax=vmax), cax=cax)
         cax.set_aspect("auto")
 

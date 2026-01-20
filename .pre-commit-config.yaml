@@ -14,7 +14,6 @@ repos:
       - id: check-ast
       - id: check-merge-conflict
       - id: debug-statements
-      - id: double-quote-string-fixer
   - repo: https://github.com/myint/docformatter
     rev: 06907d0
     hooks:
