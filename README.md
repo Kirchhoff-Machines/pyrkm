@@ -61,41 +61,12 @@ To get started with the project, follow these steps:
 
 To learn how to use the package, follow the [official documentation](https://kirchhoff-machines.github.io/pyrkm/) and in particular [this tutorial](https://kirchhoff-machines.github.io/pyrkm/examples/first_example/).
 
-## Development
 
-### Docker Environment
+## Docker Environment
 
-Reproducible development environment with Docker:
+Reproducible development environment with Docker.
+See [docs/docker.md](docs/docker.md) for complete Docker guide.
 
-```bash
-# Quick start with GPU support
-make build
-make dev
-
-# Start Jupyter Lab
-make jupyter
-
-# Run tests
-make test
-```
-
-See [DOCKER.md](DOCKER.md) for complete Docker guide.
-
-### Code Quality
-
-Comprehensive pre-commit hooks ensure code quality:
-
-```bash
-# One-time setup
-pip install -e ".[develop]"
-pre-commit install
-
-# Hooks run automatically on commit
-git commit -m "Your message"
-```
-
-Includes: Black, isort, Flake8, MyPy, Bandit, and more.
-See [PRE_COMMIT_GUIDE.md](PRE_COMMIT_GUIDE.md) for details.
 
 ## Contribution Guidelines
 

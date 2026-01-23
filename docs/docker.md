@@ -48,20 +48,4 @@ pykr-gpu  |     http://127.0.0.1:8888/lab?token=a1b2c3d4e5f6...
 
 ### 4. Troubleshooting
 
-**Error: `ModuleNotFoundError: No module named 'distutils'`**
-This happens if you use the old `docker-compose` (v1) command with Python 3.12, which has removed `distutils`.
-*   **Solution**: Use `docker compose` (with a space) instead of `docker-compose` (with a hyphen). This uses the newer Docker CLI plugin which relies on Go, not Python, and avoids this error.
-
-**Permissions Errors**
-If you have issues editing files from inside Docker (or vice versa) on Linux, it may be due to user permissions.
-*   The simplified Docker setup runs as root inside the container to avoid complexity. Just be aware that files created inside the container *might* belong to root.
-*   To fix file ownership on your host machine after stopping Docker, you can run: `sudo chown -R $USER:$USER .`
-
-### 5. Stopping the Environment
-
-To stop the container, verify you are in the terminal where it is running and press `Ctrl+C`.
-Alternatively, open a new terminal in the same directory and run:
-
-```bash
-docker compose down
-```
+If you encounter issues, ensure your NVIDIA drivers are up to date and that the `nvidia-container-toolkit` is correctly configured.

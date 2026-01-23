@@ -6,6 +6,7 @@ repo_name: pyrkm
 nav:
   - Home: index.md
   - Installation: installation.md
+  - Docker: docker.md
   - How to use: examples/first_example.ipynb
   - Energy consumption: energy_consumption.md
   - Python API:
