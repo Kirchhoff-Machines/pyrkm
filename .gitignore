@@ -1,35 +1,38 @@
-*.pkl
-*.swp
-tasks.json
+# General
 .DS_Store
-.vscode/
+*.swp
 
+# VS Code
+.vscode/
+tasks.json
+
+# Python
+__pycache__/
+*.pkl
+pyrkm.egg-info/
+build/
+
+# Testing and Linting
 .mypy_cache/
 .mypy*
-
 .pytest_cache/
-
-tMp/
-__pycache__/
-build/
 .ruff_cache/
-pyrkm.egg-info/
-
 .coverage
 .coverage*
-
 .tests
 
-# Temp files from the notebook run
-model_measures/
+# Virtual Environments
+venv/
+.venv/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Project specific temporary output directories (recursive)
+# These are used for storing model states and measures
+model_measure/
 model_states/
 classifier_states/
-*/model_measures/
-*/model_states/
-*/classifier_states/
-*/*/model_measures/
-*/*/model_states/
-*/*/classifier_states/
-*/*/*/model_measures/
-*/*/*/model_states/
-*/*/*/classifier_states/
+
+# Temporary directories
+tMp/

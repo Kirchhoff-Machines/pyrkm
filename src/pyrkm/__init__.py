@@ -1,4 +1,8 @@
-# Import any modules or subpackages here
+"""PyRKM: Python Restricted Boltzmann Machines and Kirchhoff Machines.
+
+A package for training and using RBMs and RKMs for generative modeling.
+"""
+
 from __future__ import annotations
 
 from .classifier import CustomDataset, SimpleClassifier, show_classification, train_classifier
@@ -23,12 +27,28 @@ from .utils import (
     unpickle,
 )
 
-__version__ = '0.1.0'
+__version__ = "0.1.0"
 __all__ = [
-    'RBM', 'RKM', 'load_model', 'show_and_save', 'make_grid', 'getbasebias',
-    'Covariance_error', 'Third_moment_error', 'PowerSpectrum_MSE',
-    'ComputeAATS', 'Compute_FID', 'Compute_S', 'generate_S_matrix',
-    'generate_synthetic_data', 'my_entropy', 'binarize_image', 'CustomDataset',
-    'SimpleClassifier', 'train_classifier', 'show_classification',
-    'ensure_dir', 'unpickle'
+    "RBM",
+    "RKM",
+    "load_model",
+    "show_and_save",
+    "make_grid",
+    "getbasebias",
+    "Covariance_error",
+    "Third_moment_error",
+    "PowerSpectrum_MSE",
+    "ComputeAATS",
+    "Compute_FID",
+    "Compute_S",
+    "generate_S_matrix",
+    "generate_synthetic_data",
+    "my_entropy",
+    "binarize_image",
+    "CustomDataset",
+    "SimpleClassifier",
+    "train_classifier",
+    "show_classification",
+    "ensure_dir",
+    "unpickle",
 ]

@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest', 'macos-latest']
-        python-version: ['3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         gcc-version: ['12']
 
     steps:
@@ -59,6 +59,7 @@ jobs:
 
     - name: Report coverage
       run: |
+        python -m coverage xml
         python -m coverage json
         export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
         echo "total=$TOTAL" >> $GITHUB_ENV
@@ -66,6 +67,12 @@ jobs:
         echo $'\n```' >> $GITHUB_STEP_SUMMARY
         python -m coverage report >> $GITHUB_STEP_SUMMARY
         echo $'\n```' >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
 
     - name: Make coverage badge
       if: github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest'

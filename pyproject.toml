@@ -10,8 +10,8 @@ description = "Machines learning to do machine-learning"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-	{name = "Simone Ciarella", email = "simoneciarella@gmail.com"},
-	{name = "Marcelo Guzmánn", email = "guzmanjmarcelo@gmail.com"},
+    {name = "Simone Ciarella", email = "simoneciarella@gmail.com"},
+    {name = "Marcelo Guzmánn", email = "guzmanjmarcelo@gmail.com"},
 ]
 keywords = [
     'python',
@@ -58,6 +58,16 @@ develop = [
     "pytest-mpl",
     "pytest-dependency",
     "pytest-image-diff",
+    "black>=24.1.0",
+    "isort>=5.13.0",
+    "flake8>=7.0.0",
+    "flake8-docstrings",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "flake8-simplify",
+    "bandit[toml]>=1.7.0",
+    "autoflake>=2.2.0",
+    "pyupgrade>=3.15.0",
 ]
 
 docs = [
@@ -89,17 +99,18 @@ source = ["pyrkm"]
 testpaths = ["tests"]
 
 [tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
 # Enable Pyflakes `E` and `F` codes by default.
 select = [
-	"F",  # Pyflakes
-	"E",  # pycodestyle (error)
-	"W",  # pycodestyle (warning)
+    "F",  # Pyflakes
+    "E",  # pycodestyle (error)
+    "W",  # pycodestyle (warning)
     "I",  # isort
 ]
 
-line-length = 110
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party=["pyrkm"]
 known-third-party = ["torch"]
 required-imports = ["from __future__ import annotations"]
@@ -108,11 +119,60 @@ required-imports = ["from __future__ import annotations"]
 files = ["src", "tests"]
 allow_redefinition = true
 ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+disallow_untyped_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = "yaml"
 ignore_missing_imports = true
 
+[tool.black]
+line-length = 110
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 110
+known_first_party = ["pyrkm"]
+known_third_party = ["torch", "numpy", "matplotlib"]
+skip_gitignore = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101"]  # Skip assert_used check in tests
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod"
+]
+
+[tool.docformatter]
+wrap-summaries = 110
+wrap-descriptions = 110
 
 [tool.bumpversion]
 current_version = "0.1.0"

@@ -1,0 +1,22 @@
+services:
+  pyrkm:
+    build: .
+    image: pyrkm:latest
+    container_name: pyrkm-gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - .:/app
+    ports:
+      - "8888:8888"
+    working_dir: /app
+    stdin_open: true
+    tty: true
