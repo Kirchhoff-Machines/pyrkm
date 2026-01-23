@@ -1,6 +1,4 @@
-"""
-Generate requirements.txt from pyproject.toml.
-"""
+"""Generate requirements.txt from pyproject.toml."""
 
 from __future__ import annotations
 

@@ -1,6 +1,4 @@
-"""
-Tests for utility functions.
-"""
+"""Tests for utility functions."""
 
 from __future__ import annotations
 
@@ -121,18 +119,14 @@ def test_unpickle() -> None:
 
 
 def test_getbasebias_shape() -> None:
-    """
-    Test getbasebias output shape.
-    """
+    """Test getbasebias output shape."""
     data = torch.tensor([[0.1, 0.9, 0.3], [0.4, 0.6, 0.8]])
     result = getbasebias(data)
     assert result.shape == (3,)
 
 
 def test_getbasebias_values() -> None:
-    """
-    Test getbasebias computes reasonable values.
-    """
+    """Test getbasebias computes reasonable values."""
     data = torch.tensor([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
     result = getbasebias(data)
     assert torch.is_tensor(result)
@@ -141,9 +135,7 @@ def test_getbasebias_values() -> None:
 
 
 def test_third_moment_error_symmetric() -> None:
-    """
-    Test third moment error is symmetric.
-    """
+    """Test third moment error is symmetric."""
     data1 = torch.randn(10, 5)
     data2 = torch.randn(10, 5)
     Nv = 5
@@ -153,9 +145,7 @@ def test_third_moment_error_symmetric() -> None:
 
 
 def test_third_moment_error_zero_for_same_data() -> None:
-    """
-    Test third moment error is zero for identical data.
-    """
+    """Test third moment error is zero for identical data."""
     data = torch.randn(10, 5)
     Nv = 5
     error = Third_moment_error(data, data, Nv)
@@ -163,9 +153,7 @@ def test_third_moment_error_zero_for_same_data() -> None:
 
 
 def test_power_spectrum_mse_shape() -> None:
-    """
-    Test PowerSpectrum_MSE output is scalar.
-    """
+    """Test PowerSpectrum_MSE output is scalar."""
     data1 = torch.randn(10, 10)
     data2 = torch.randn(10, 10)
     result = PowerSpectrum_MSE(data1, data2)
@@ -173,18 +161,14 @@ def test_power_spectrum_mse_shape() -> None:
 
 
 def test_power_spectrum_mse_zero_for_same_data() -> None:
-    """
-    Test PowerSpectrum_MSE is zero for identical data.
-    """
+    """Test PowerSpectrum_MSE is zero for identical data."""
     data = torch.randn(10, 10)
     result = PowerSpectrum_MSE(data, data)
     assert torch.allclose(result, torch.tensor(0.0), atol=1e-5)
 
 
 def test_compute_aats_output_length() -> None:
-    """
-    Test ComputeAATS returns two values.
-    """
+    """Test ComputeAATS returns two values."""
     data1 = torch.randn(10, 5)
     data2 = torch.randn(10, 5)
     result = ComputeAATS(data1, data2)
@@ -193,9 +177,7 @@ def test_compute_aats_output_length() -> None:
 
 
 def test_compute_s_range() -> None:
-    """
-    Test Compute_S returns value in reasonable range.
-    """
+    """Test Compute_S returns value in reasonable range."""
     data1 = torch.randn(20, 5)
     data2 = torch.randn(20, 5)
     result = Compute_S(data1, data2)
@@ -204,9 +186,7 @@ def test_compute_s_range() -> None:
 
 
 def test_compute_s_zero_for_same_data() -> None:
-    """
-    Test Compute_S is zero for identical data.
-    """
+    """Test Compute_S is zero for identical data."""
     data = torch.randn(20, 5)
     result = Compute_S(data, data)
     assert isinstance(result, (float, np.floating))
@@ -214,9 +194,7 @@ def test_compute_s_zero_for_same_data() -> None:
 
 
 def test_generate_s_matrix_shape() -> None:
-    """
-    Test generate_S_matrix creates correct shape.
-    """
+    """Test generate_S_matrix creates correct shape."""
     shapes = [(5, 5), (10, 20), (3, 7)]
     for shape in shapes:
         result = generate_S_matrix(shape, target=0.5)
@@ -224,17 +202,13 @@ def test_generate_s_matrix_shape() -> None:
 
 
 def test_generate_s_matrix_range() -> None:
-    """
-    Test generate_S_matrix creates values in valid range.
-    """
+    """Test generate_S_matrix creates values in valid range."""
     result = generate_S_matrix((10, 10), target=0.5)
     assert np.all((result >= 0) & (result <= 1))
 
 
 def test_generate_synthetic_data_shape() -> None:
-    """
-    Test generate_synthetic_data creates correct shape.
-    """
+    """Test generate_synthetic_data creates correct shape."""
     data_sizes = [(10, 28, 28), (5, 16, 16), (20, 32, 32)]
     for data_size in data_sizes:
         result = generate_synthetic_data(target_entropy=0.5, data_size=data_size)
@@ -242,17 +216,13 @@ def test_generate_synthetic_data_shape() -> None:
 
 
 def test_generate_synthetic_data_values() -> None:
-    """
-    Test generate_synthetic_data creates binary values.
-    """
+    """Test generate_synthetic_data creates binary values."""
     result = generate_synthetic_data(target_entropy=0.5, data_size=(10, 28, 28))
     assert np.all((result == 0) | (result == 1))
 
 
 def test_my_entropy_output() -> None:
-    """
-    Test my_entropy returns two values.
-    """
+    """Test my_entropy returns two values."""
     data = np.random.rand(10, 28, 28)
     S_image, S_pixel = my_entropy(data)
     # Handle both scalar and array returns
@@ -267,9 +237,7 @@ def test_my_entropy_output() -> None:
 
 
 def test_my_entropy_binary_data() -> None:
-    """
-    Test my_entropy on binary data.
-    """
+    """Test my_entropy on binary data."""
     data = np.random.randint(0, 2, (10, 28, 28)).astype(float)
     S_image, S_pixel = my_entropy(data)
     # Handle array or scalar returns
@@ -282,18 +250,14 @@ def test_my_entropy_binary_data() -> None:
 
 
 def test_binarize_image_binary_output() -> None:
-    """
-    Test binarize_image produces binary output.
-    """
+    """Test binarize_image produces binary output."""
     image = np.random.randint(0, 255, (28, 28))
     result = binarize_image(image)
     assert np.all((result == 0) | (result == 1))
 
 
 def test_binarize_image_preserves_shape() -> None:
-    """
-    Test binarize_image preserves image shape.
-    """
+    """Test binarize_image preserves image shape."""
     shapes = [(28, 28), (64, 64), (100, 100)]
     for shape in shapes:
         image = np.random.randint(0, 255, shape)
@@ -302,9 +266,7 @@ def test_binarize_image_preserves_shape() -> None:
 
 
 def test_binarize_image_threshold() -> None:
-    """
-    Test binarize_image applies threshold correctly.
-    """
+    """Test binarize_image applies threshold correctly."""
     # Create image with known values
     image = np.array([[0, 127, 255], [50, 128, 200]])
     result = binarize_image(image)
@@ -314,9 +276,7 @@ def test_binarize_image_threshold() -> None:
 
 
 def test_unpickle_file_not_found() -> None:
-    """
-    Test unpickle handles non-existent files.
-    """
+    """Test unpickle handles non-existent files."""
     try:
         unpickle("nonexistent_file.pkl")
         # If it doesn't raise, result should be None or handle gracefully
@@ -326,9 +286,7 @@ def test_unpickle_file_not_found() -> None:
 
 
 def test_generate_synthetic_data_different_entropies() -> None:
-    """
-    Test generating data with different target entropies.
-    """
+    """Test generating data with different target entropies."""
     entropies = [0.2, 0.5, 0.8]
     data_size = (10, 28, 28)
     for target_entropy in entropies:
@@ -339,9 +297,7 @@ def test_generate_synthetic_data_different_entropies() -> None:
 
 
 def test_compute_fid_basic() -> None:
-    """
-    Test basic FID computation.
-    """
+    """Test basic FID computation."""
     # Create two sets of simple images
     real_images = torch.rand(10, 1, 28, 28)
     generated_images = torch.rand(10, 1, 28, 28)
@@ -355,9 +311,7 @@ def test_compute_fid_basic() -> None:
 
 
 def test_compute_fid_identical_images() -> None:
-    """
-    Test FID with identical images should be near zero.
-    """
+    """Test FID with identical images should be near zero."""
     images = torch.rand(10, 1, 28, 28)
 
     fid = Compute_FID(images, images)
@@ -367,9 +321,7 @@ def test_compute_fid_identical_images() -> None:
 
 
 def test_ensure_dir_creates_directory(tmp_path) -> None:
-    """
-    Test ensure_dir creates a new directory.
-    """
+    """Test ensure_dir creates a new directory."""
     import os
 
     new_dir = tmp_path / "test_directory"
@@ -382,9 +334,7 @@ def test_ensure_dir_creates_directory(tmp_path) -> None:
 
 
 def test_ensure_dir_existing_directory(tmp_path) -> None:
-    """
-    Test ensure_dir handles existing directories.
-    """
+    """Test ensure_dir handles existing directories."""
     import os
 
     existing_dir = tmp_path / "existing_dir"
@@ -398,9 +348,7 @@ def test_ensure_dir_existing_directory(tmp_path) -> None:
 
 
 def test_make_grid_basic() -> None:
-    """
-    Test make_grid creates a proper grid of images.
-    """
+    """Test make_grid creates a proper grid of images."""
     # Create 16 sample 8x8 images
     images = np.random.rand(16, 8, 8)
 
@@ -414,9 +362,7 @@ def test_make_grid_basic() -> None:
 
 
 def test_make_grid_single_image() -> None:
-    """
-    Test make_grid with a single image.
-    """
+    """Test make_grid with a single image."""
     image = np.random.rand(1, 10, 10)
 
     grid = make_grid(image, nrow=1, padding=2)
@@ -427,9 +373,7 @@ def test_make_grid_single_image() -> None:
 
 
 def test_load_model_nonexistent() -> None:
-    """
-    Test load_model with non-existent model.
-    """
+    """Test load_model with non-existent model."""
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -441,9 +385,7 @@ def test_load_model_nonexistent() -> None:
 
 
 def test_load_model_with_existing_model(tmp_path) -> None:
-    """
-    Test load_model can load an existing model.
-    """
+    """Test load_model can load an existing model."""
     import pickle
 
     from pyrkm import RBM

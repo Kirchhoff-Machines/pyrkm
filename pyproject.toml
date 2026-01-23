@@ -173,7 +173,6 @@ exclude_lines = [
 [tool.docformatter]
 wrap-summaries = 110
 wrap-descriptions = 110
-make-summary-multi-line = true
 
 [tool.bumpversion]
 current_version = "0.1.0"

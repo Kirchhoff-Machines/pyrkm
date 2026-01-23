@@ -1,6 +1,4 @@
-"""
-Restricted Boltzmann Machine implementation.
-"""
+"""Restricted Boltzmann Machine implementation."""
 
 from __future__ import annotations
 
@@ -92,10 +90,8 @@ class RBM:
     max_W: float = 10
 
     def __post_init__(self):
-        """
-        Initializes the RBM model by setting up the device, parameters, optimizer, persistent chains,
-        centering, save points, and physical performance.
-        """
+        """Initializes the RBM model by setting up the device, parameters, optimizer, persistent chains,
+        centering, save points, and physical performance."""
         print(f"*** Initializing {self.model_name}")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         torch.set_default_dtype(self.mytype)
@@ -109,9 +105,7 @@ class RBM:
         self._initialize_physical_performance()
 
     def _initialize_parameters(self):
-        """
-        Initializes the parameters of the RBM model, including weights and biases.
-        """
+        """Initializes the parameters of the RBM model, including weights and biases."""
         self.W = (
             torch.randn((self.n_hidden, self.n_visible), dtype=self.mytype, device=self.device)
             * 0.1
@@ -125,16 +119,12 @@ class RBM:
         self._clip_parameters()
 
     def _clip_parameters(self):
-        """
-        Clips the weights and biases of the RBM model to be within specified bounds.
-        """
+        """Clips the weights and biases of the RBM model to be within specified bounds."""
         self.clip_weights()
         self.clip_bias()
 
     def _initialize_optimizer(self):
-        """
-        Initializes the optimizer parameters if the optimizer is Adam.
-        """
+        """Initializes the optimizer parameters if the optimizer is Adam."""
         if self.optimizer == "Adam":
             self.m_dW = torch.zeros_like(self.W)
             self.m_dv = torch.zeros_like(self.v_bias)
@@ -147,9 +137,7 @@ class RBM:
             self.epsilon = 1e-8
 
     def _initialize_persistent_chains(self):
-        """
-        Initializes the persistent chains for the PCD training algorithm.
-        """
+        """Initializes the persistent chains for the PCD training algorithm."""
         if self.train_algo == "PCD":
             self.persistent_chains = (
                 torch.where(torch.rand(self.batch_size, self.n_visible) > 0.5, 1.0, 0.0)
@@ -158,9 +146,7 @@ class RBM:
             )
 
     def _initialize_centering(self):
-        """
-        Initializes the centering parameters if centering is enabled.
-        """
+        """Initializes the centering parameters if centering is enabled."""
         if self.centering:
             if self.average_data is None:
                 print("Error: you need to provide the average of the data to center the gradient")
@@ -179,9 +165,7 @@ class RBM:
             self.oh = 0
 
     def _initialize_save_points(self):
-        """
-        Initializes the save points for the RBM model.
-        """
+        """Initializes the save points for the RBM model."""
         num_points = 50
         self.t_to_save = sorted(
             list(
@@ -194,9 +178,7 @@ class RBM:
         )
 
     def _initialize_physical_performance(self):
-        """
-        Initializes the physical performance metrics for the RBM model.
-        """
+        """Initializes the physical performance metrics for the RBM model."""
         self.power_f = 0
         self.power_b = 0
         self.energy = 0
@@ -602,9 +584,8 @@ class RBM:
         print("*** Training finished", flush=True)
 
     def after_step_keepup(self) -> None:
-        """
-        Performs operations to keep the model parameters within specified bounds after each training step.
-        """
+        """Performs operations to keep the model parameters within specified bounds after each training
+        step."""
         self.clip_weights()
         self.clip_bias()
 
@@ -774,16 +755,12 @@ class RBM:
         return v_model.detach().cpu().numpy()
 
     def clip_weights(self) -> None:
-        """
-        Clips the weights of the RBM model to be within specified bounds.
-        """
+        """Clips the weights of the RBM model to be within specified bounds."""
         self.W = torch.clip(self.W, self.min_W, self.max_W).to(self.device)
         self.W_t = self.W.t()
 
     def clip_bias(self) -> None:
-        """
-        Clips the biases of the RBM model to be within specified bounds.
-        """
+        """Clips the biases of the RBM model to be within specified bounds."""
         self.v_bias = torch.clip(self.v_bias, self.min_W, self.max_W).to(self.device)
         self.h_bias = torch.clip(self.h_bias, self.min_W, self.max_W).to(self.device)
 

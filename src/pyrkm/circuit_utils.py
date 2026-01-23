@@ -1,6 +1,4 @@
-"""
-Circuit utility functions for quantum computing applications.
-"""
+"""Circuit utility functions for quantum computing applications."""
 
 from __future__ import annotations
 

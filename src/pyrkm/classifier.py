@@ -1,6 +1,4 @@
-"""
-CNN classifier and dataset classes for image classification.
-"""
+"""CNN classifier and dataset classes for image classification."""
 
 from __future__ import annotations
 

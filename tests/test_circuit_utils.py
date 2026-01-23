@@ -1,6 +1,4 @@
-"""
-Tests for circuit utility functions.
-"""
+"""Tests for circuit utility functions."""
 
 from __future__ import annotations
 
@@ -59,18 +57,14 @@ def test_solve(circuit) -> None:
 
 
 def test_circuit_initialization(circuit) -> None:
-    """
-    Test circuit is properly initialized.
-    """
+    """Test circuit is properly initialized."""
     assert circuit.graph is not None
     assert circuit.graph.number_of_nodes() == 4
     assert circuit.graph.number_of_edges() == 4
 
 
 def test_conductances_array_type(circuit) -> None:
-    """
-    Test conductances are stored correctly.
-    """
+    """Test conductances are stored correctly."""
     conductances = [1.0, 2.0, 3.0, 4.0]
     circuit.setConductances(conductances)
     assert isinstance(circuit.conductances, (list, np.ndarray))
@@ -78,9 +72,7 @@ def test_conductances_array_type(circuit) -> None:
 
 
 def test_hessian_symmetry(circuit) -> None:
-    """
-    Test hessian matrix is symmetric.
-    """
+    """Test hessian matrix is symmetric."""
     conductances = [1.0, 2.0, 3.0, 4.0]
     circuit.setConductances(conductances)
     hessian = circuit._hessian()
@@ -93,9 +85,7 @@ def test_hessian_symmetry(circuit) -> None:
 
 
 def test_hessian_diagonal_sum(circuit) -> None:
-    """
-    Test hessian diagonal properties.
-    """
+    """Test hessian diagonal properties."""
     conductances = [1.0, 2.0, 3.0, 4.0]
     circuit.setConductances(conductances)
     hessian = circuit._hessian()
@@ -110,27 +100,21 @@ def test_hessian_diagonal_sum(circuit) -> None:
 
 
 def test_constraint_matrix_shape(circuit) -> None:
-    """
-    Test constraint matrix has correct shape.
-    """
+    """Test constraint matrix has correct shape."""
     indices_nodes = np.array([0, 2, 3])
     Q = circuit.constraint_matrix(indices_nodes)
     assert Q.shape == (4, 3)
 
 
 def test_constraint_matrix_single_node(circuit) -> None:
-    """
-    Test constraint matrix with single node.
-    """
+    """Test constraint matrix with single node."""
     indices_nodes = np.array([1])
     Q = circuit.constraint_matrix(indices_nodes)
     assert Q.shape == (4, 1)
 
 
 def test_solve_with_different_sources(circuit) -> None:
-    """
-    Test solving with different current sources.
-    """
+    """Test solving with different current sources."""
     conductances = [1.0, 1.0, 1.0, 1.0]
     circuit.setConductances(conductances)
     indices_nodes = np.array([0, 3])
@@ -149,9 +133,7 @@ def test_solve_with_different_sources(circuit) -> None:
 
 
 def test_zero_conductances_handling(circuit) -> None:
-    """
-    Test handling of zero conductances.
-    """
+    """Test handling of zero conductances."""
     conductances = [0.0, 1.0, 2.0, 3.0]
     circuit.setConductances(conductances)
     hessian = circuit._hessian()
@@ -160,9 +142,7 @@ def test_zero_conductances_handling(circuit) -> None:
 
 
 def test_large_conductances(circuit) -> None:
-    """
-    Test circuit with large conductances.
-    """
+    """Test circuit with large conductances."""
     conductances = [100.0, 200.0, 150.0, 250.0]
     circuit.setConductances(conductances)
     indices_nodes = np.array([0, 2])

@@ -1,6 +1,4 @@
-"""
-Restricted Kirchhoff Machine implementation.
-"""
+"""Restricted Kirchhoff Machine implementation."""
 
 from __future__ import annotations
 
@@ -39,9 +37,7 @@ class RKM(RBM):
     layer_scaled: bool = True
 
     def __post_init__(self):
-        """
-        Initialize the RKM model after the dataclass is created.
-        """
+        """Initialize the RKM model after the dataclass is created."""
         super().__post_init__()
         if self.average_data is not None:
             self.v_bias = self.average_data.to(self.device).to(self.mytype)

@@ -1,6 +1,4 @@
-"""
-Utility functions for data processing and metrics.
-"""
+"""Utility functions for data processing and metrics."""
 
 from __future__ import annotations
 

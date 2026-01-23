@@ -1,6 +1,4 @@
-"""
-Tests for the classifier module.
-"""
+"""Tests for the classifier module."""
 
 from __future__ import annotations
 
@@ -55,9 +53,7 @@ def test_train_classifier(train_test_data) -> None:
 
 
 def test_simple_classifier_output_range(simple_classifier) -> None:
-    """
-    Test classifier output has correct range.
-    """
+    """Test classifier output has correct range."""
     x = torch.randn(5, 1, 28, 28)
     output = simple_classifier(x)
     assert output.shape == (5, 10)
@@ -66,9 +62,7 @@ def test_simple_classifier_output_range(simple_classifier) -> None:
 
 
 def test_custom_dataset_indexing(custom_dataset) -> None:
-    """
-    Test dataset indexing works correctly.
-    """
+    """Test dataset indexing works correctly."""
     for i in range(min(10, len(custom_dataset))):
         img, label = custom_dataset[i]
         assert img.shape == (28, 28)
@@ -76,9 +70,7 @@ def test_custom_dataset_indexing(custom_dataset) -> None:
 
 
 def test_custom_dataset_with_different_sizes() -> None:
-    """
-    Test custom dataset with different data sizes.
-    """
+    """Test custom dataset with different data sizes."""
     data = torch.randn(50, 32, 32)
     targets = torch.randint(0, 5, (50,))
     dataset = CustomDataset(data, targets)
@@ -88,9 +80,7 @@ def test_custom_dataset_with_different_sizes() -> None:
 
 
 def test_classifier_architecture() -> None:
-    """
-    Test classifier architecture components.
-    """
+    """Test classifier architecture components."""
     classifier = SimpleClassifier()
     # Check that the model has the expected layers
     assert hasattr(classifier, "conv1")
@@ -100,9 +90,7 @@ def test_classifier_architecture() -> None:
 
 
 def test_train_classifier_with_multiple_epochs(train_test_data) -> None:
-    """
-    Test training with multiple epochs.
-    """
+    """Test training with multiple epochs."""
     train_set, test_set = train_test_data
     model, accuracy = train_classifier(test_set, train_set, num_epochs=3)
     assert isinstance(model, SimpleClassifier)
@@ -110,9 +98,7 @@ def test_train_classifier_with_multiple_epochs(train_test_data) -> None:
 
 
 def test_classifier_gradient_flow(simple_classifier) -> None:
-    """
-    Test that gradients flow through the model.
-    """
+    """Test that gradients flow through the model."""
     x = torch.randn(2, 1, 28, 28, requires_grad=True)
     output = simple_classifier(x)
     loss = output.sum()
@@ -121,9 +107,7 @@ def test_classifier_gradient_flow(simple_classifier) -> None:
 
 
 def test_custom_dataset_empty_error() -> None:
-    """
-    Test error handling for empty dataset.
-    """
+    """Test error handling for empty dataset."""
     data = torch.randn(0, 28, 28)
     targets = torch.randint(0, 10, (0,))
     dataset = CustomDataset(data, targets)
@@ -131,9 +115,7 @@ def test_custom_dataset_empty_error() -> None:
 
 
 def test_train_classifier_model_in_eval_mode(train_test_data) -> None:
-    """
-    Test that trained model can be set to eval mode.
-    """
+    """Test that trained model can be set to eval mode."""
     train_set, test_set = train_test_data
     model, _ = train_classifier(test_set, train_set, num_epochs=1)
     model.eval()
@@ -146,9 +128,7 @@ def test_train_classifier_model_in_eval_mode(train_test_data) -> None:
 
 
 def test_classifier_batch_processing() -> None:
-    """
-    Test classifier can process different batch sizes.
-    """
+    """Test classifier can process different batch sizes."""
     classifier = SimpleClassifier()
     for batch_size in [1, 4, 8]:
         x = torch.randn(batch_size, 1, 28, 28)
