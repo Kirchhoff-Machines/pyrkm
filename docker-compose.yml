@@ -1,120 +1,18 @@
 version: '3.8'
 
 services:
-  # Development environment with GPU support
-  pyrkm-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    image: pyrkm:dev
-    container_name: pyrkm-dev
+  pyrkm:
+    build: .
+    image: pyrkm:latest
+    container_name: pyrkm-gpu
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-      - PYTHONPATH=/app/src
     volumes:
       - .:/app
-      - pyrkm-data:/app/datasets
-      - pyrkm-models:/app/model_states
-      - pyrkm-logs:/app/logs
-    working_dir: /app
-    stdin_open: true
-    tty: true
-    command: bash
-
-  # Jupyter Lab environment
-  pyrkm-jupyter:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: jupyter
-    image: pyrkm:jupyter
-    container_name: pyrkm-jupyter
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-      - PYTHONPATH=/app/src
-      - JUPYTER_ENABLE_LAB=yes
-    volumes:
-      - .:/app
-      - pyrkm-data:/app/datasets
-      - pyrkm-models:/app/model_states
-      - pyrkm-logs:/app/logs
     ports:
       - "8888:8888"
     working_dir: /app
-    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
-
-  # TensorBoard for monitoring
-  tensorboard:
-    image: tensorflow/tensorflow:latest
-    container_name: pyrkm-tensorboard
-    volumes:
-      - pyrkm-logs:/logs
-    ports:
-      - "6006:6006"
-    command: tensorboard --logdir=/logs --host=0.0.0.0
-
-  # CPU-only environment for testing
-  pyrkm-cpu:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: cpu-only
-    image: pyrkm:cpu
-    container_name: pyrkm-cpu
-    environment:
-      - PYTHONPATH=/app/src
-    volumes:
-      - .:/app
-      - pyrkm-data:/app/datasets
-      - pyrkm-models:/app/model_states
-    working_dir: /app
     stdin_open: true
     tty: true
-    command: bash
-
-  # Production environment
-  pyrkm-prod:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
-    image: pyrkm:prod
-    container_name: pyrkm-prod
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    volumes:
-      - pyrkm-data:/app/datasets
-      - pyrkm-models:/app/model_states
-      - pyrkm-logs:/app/logs
-    working_dir: /app
-
-  # Testing environment
-  pyrkm-test:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    image: pyrkm:test
-    container_name: pyrkm-test
-    environment:
-      - PYTHONPATH=/app/src
-    volumes:
-      - .:/app
-      - pyrkm-data:/app/datasets
-    working_dir: /app
-    command: pytest tests/ -v --cov=src/pyrkm --cov-report=html
-
-volumes:
-  pyrkm-data:
-    driver: local
-  pyrkm-models:
-    driver: local
-  pyrkm-logs:
-    driver: local
