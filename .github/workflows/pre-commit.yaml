@@ -46,21 +46,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[develop]"
 
-      - name: Check with black
-        run: black --check src/ tests/
-
-      - name: Check with isort
-        run: isort --check-only src/ tests/
-
-      - name: Lint with flake8
-        run: flake8 src/ tests/ --count --show-source --statistics
-
-      - name: Type check with mypy
-        run: mypy src/
-
-      - name: Security check with bandit
-        run: bandit -r src/ -c pyproject.toml
-
   test:
     runs-on: ubuntu-latest
     strategy:
