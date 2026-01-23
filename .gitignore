@@ -36,3 +36,5 @@ classifier_states/
 
 venv/
 .venv/
+
+examples/.ipynb_checkpoints/

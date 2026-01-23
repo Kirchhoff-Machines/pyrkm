@@ -30,14 +30,13 @@ RUN pip install --upgrade pip setuptools wheel
 WORKDIR /app
 
 # Copy requirements
-COPY requirements.txt requirements_full.txt ./
-COPY pyproject.toml MANIFEST.in ./
+COPY requirements.txt ./
 
 # Install PyTorch with CUDA support
 RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-# Install project dependencies including development and docs extras
-RUN pip install -e ".[develop,docs]"
+# Install project dependencies
+RUN pip install -r requirements.txt
 
 # Install Jupyter and other tools
 RUN pip install \
@@ -49,8 +48,8 @@ RUN pip install \
 # Copy the entire project
 COPY . .
 
-# Install the package in editable mode
-RUN pip install -e .
+# Install the package in editable mode with extras
+RUN pip install -e ".[develop,docs]"
 
 # Configure Jupyter to allow root access and external connections
 RUN jupyter notebook --generate-config && \
