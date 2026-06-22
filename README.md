@@ -12,14 +12,14 @@
 
 You may be familiar with Restricted Boltzmann Machines (RBMs) [[1](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.35.1792)]-[[2](https://www.science.org/doi/10.1126/science.1127647)], which are a type of generative neural network that can learn a probability distribution over its input data. The Restricted Kirchhoff Machine (RKM) is a realization of a RBM using resistor networks, and Kirchhoff's laws of electrical circuits. In this repository, we provide a Python package to virtually simulate the training and evaluation of RKMs.
 
-For more information about the capabilities of the RKM, see the original paper by [Link to arXiv paper](https://arxiv.org/abs/2509.15842).
+For more information about the capabilities of the RKM, see the original paper: [Link to arXiv paper](https://arxiv.org/abs/2509.15842) (also published in [PNAS](https://www.pnas.org/doi/abs/10.1073/pnas.2525792123)).
 
 ## Repository Contents
 
 In this repository you will find the following:
 
 - `src/pyrkm/`: The main package code. You can use this code to train and evaluate RKMs. For more information, see the [documentation](https://kirchhoff-machines.github.io/pyrkm/). For a quick start, see the [Usage](#usage) section below.
-- `energy_consumption`: A series of scripts to evaluate the energy consumption of the RKM and compare it to the estimated cost of a RBM. They are used to generate the results in the [paper](https://arxiv.org/abs/2509.15842).
+- `energy_consumption`: A series of scripts to evaluate the energy consumption of the RKM and compare it to the estimated cost of a RBM. They are used to generate the results in the [paper](https://arxiv.org/abs/2509.15842) (also published in [PNAS](https://www.pnas.org/doi/abs/10.1073/pnas.2525792123)).
 
 ## Getting Started
 

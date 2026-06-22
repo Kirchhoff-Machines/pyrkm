@@ -26,5 +26,25 @@ keywords:
   - boltzmann machine
   - physical learning
   - equilibrium propagation
+preferred-citation:
+  title: >-
+    Unsupervised and probabilistic learning with Contrastive Local Learning Networks: The Restricted Kirchhoff Machine
+  authors:
+    - given-names: Marcelo
+      family-names: Guzmán
+      orcid: 'https://orcid.org/0000-0002-5256-8840'
+    - given-names: Simone
+      family-names: Ciarella
+      email: simoneciarella@gmail.com
+      affiliation: Netherlands eScience Center
+      orcid: 'https://orcid.org/0000-0002-9247-139X'
+    - given-names: Andrea J.
+      family-names: Liu
+      orcid: 'https://orcid.org/0000-0002-2295-2729'
+  doi: 10.1073/pnas.2525792123
+  url: 'https://www.pnas.org/doi/abs/10.1073/pnas.2525792123'
+  type: article
+  journal: Proceedings of the National Academy of Sciences
+  year: 2026
 license: Apache-2.0
 version: 0.1.0
