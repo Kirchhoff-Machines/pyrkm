@@ -184,7 +184,7 @@ class Circuit:
         cmap : str, optional
             Colormap to use for the plot.
         """
-        _cmap = plt.cm.get_cmap(cmap)
+        _cmap = plt.colormaps[cmap]
         pos_edges = np.array(
             [
                 np.array([self.graph.nodes[edge[0]]["pos"], self.graph.nodes[edge[1]]["pos"]]).T

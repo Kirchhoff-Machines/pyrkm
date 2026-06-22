@@ -14,7 +14,8 @@ from .rbm import RBM
 class RKM(RBM):
     """A class to represent a Restricted Kirchhoff Machine (RKM).
     It is inherited from the RBM class, so look at the RBM class for info about the attributes and methods.
-    Also, refer to the paper https://arxiv.org/abs/2509.15842 (also published in PNAS https://www.pnas.org/doi/abs/10.1073/pnas.2525792123) for more details on the RKM.
+    Also, refer to the paper https://arxiv.org/abs/2509.15842
+    (also published in PNAS https://www.pnas.org/doi/abs/10.1073/pnas.2525792123) for more details.
 
     Parameters
     ----------
